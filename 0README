@@ -9,3 +9,20 @@ echo "Repository for developing code for optimization of protein-protein interac
 git add 0README
 git commit -am "setup"
 git push -u origin master
+
+# From Git Repository after setup
+…or create a new repository on the command line
+
+
+echo "# PPI_Optimization" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git remote add origin git@github.com:lsahlstr/PPI_Optimization.git
+git push -u origin master
+…or push an existing repository from the command line
+
+
+git remote add origin git@github.com:lsahlstr/PPI_Optimization.git
+git push -u origin master
+
