@@ -1,1 +1,11 @@
 Repository for developing code for optimization of protein-protein interactions.
+
+# Setup repo:
+In directory above,
+git clone git@github.com:lsahlstr/PPI_Optimization.git
+
+cd PPI_Optimization/
+echo "Repository for developing code for optimization of protein-protein interactions." >> 0README
+git add 0README
+git commit -am "setup"
+git push -u origin master
