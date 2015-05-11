@@ -53,7 +53,7 @@ MakeMask <- function(mask) {
 				} else {
 					mask2[k] <- 0;
 				}
-				print (c(k,mask[k],mask2[k]))
+				#print (c(k,mask[k],mask2[k]))
 				k <- k + 1 
 			}
         }
@@ -117,14 +117,16 @@ calE <- function(eps) {
   tmp <- data.frame(flag=comb[,1],system=comb[,2],rmsd=comb[,3],ener=rowSums(eps*tmp))
 }
 
-calE2 <- function(eps) {
-  tmp <- comb[,c(-1,-2,-3)]
-  eps <- combineEPS(eps)
-  eps1 <- eps*mask
-  eps2 <- eps*mask2
-  eps1 <- matrix(eps1,nrow=nrow(tmp),ncol=ncol(tmp),byrow=T)
-  eps2 <- matrix(eps2,nrow=nrow(tmp),ncol=ncol(tmp),byrow=T)
-  tmp <- data.frame(flag=comb[,1],system=comb[,2],rmsd=comb[,3],ener=(rowSums(eps1*tmp)+rowSums(eps2*tmp)))
+calE2 <- function(eps1,eps2) {
+	# 1 = new; 2 = old params
+  	tmp <- comb[,c(-1,-2,-3)]
+  	eps1 <- combineEPS(eps1)
+  	eps2 <- combineEPS(eps2)
+  	eps1 <- eps1*mask
+  	eps2 <- eps2*mask2
+  	eps1 <- matrix(eps1,nrow=nrow(tmp),ncol=ncol(tmp),byrow=T)
+  	eps2 <- matrix(eps2,nrow=nrow(tmp),ncol=ncol(tmp),byrow=T)
+  	tmp <- data.frame(flag=comb[,1],system=comb[,2],rmsd=comb[,3],ener=(rowSums(eps1*tmp)+rowSums(eps2*tmp)))
 }
 
 #######################################################################
@@ -187,18 +189,18 @@ for (p in seq_along(pdbs)) {
 }
 
 # Compute initial energy
-#check <- calE(ipars)
-#check$oldenergy <- calE(ipars)$ener
-#check <- check[order(check$system,check$ener),]
-#print(check)
-
-check <- calE2(ipars)
-check$oldenergy <- calE2(ipars)$ener
+check <- calE(ipars)
+check$oldenergy <- calE(ipars)$ener
 check <- check[order(check$system,check$ener),]
-print(check)
+write.table(check,file="check1.txt",row.names=F,quote=F,col.names=T)
+
+check <- calE2(ipars,ipars)
+check$oldenergy <- calE2(ipars,ipars)$ener
+check <- check[order(check$system,check$ener),]
+write.table(check,file="check2.txt",row.names=F,quote=F,col.names=T)
 
 
-stop("Exiting")
+#stop("Exiting")
 
 # Create a test set
 test <- comb[comb[,2]==3,]
@@ -232,8 +234,8 @@ train <- comb
 comb <- test
 
 bestPars <- as.vector(GAReal@bestSol[[iters]])
-check <- calE(bestPars)
-check$oldenergy <- calE(ipars)$ener
+check <- calE2(bestPars,ipars)
+check$oldenergy <- calE2(ipars,ipars)$ener
 
 check <- check[order(check$system,check$ener),]
 results <- data.frame(resname=iparsRes, eii_initial=ipars,eii_optimized=as.matrix(as.vector(GAReal@bestSol[[iters]])))
