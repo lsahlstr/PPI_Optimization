@@ -75,48 +75,47 @@ SLR <- function(result) {
     return(-sum(log(ri/N))/SLRmax)
 }
 
-#fitness <- function(eps) {
-#  tmp <- comb[,c(-1,-2,-3)]
-#  eps <- combineEPS(eps)
-#  eps <- eps*mask
-#  eps <- matrix(eps,nrow=nrow(tmp),ncol=ncol(tmp),byrow=T)
-#  tmp <- data.frame(flag=comb[,1],system=comb[,2],rmsd=comb[,3],ener=rowSums(eps*tmp))
-#  tmp <- tmp[order(tmp$ener),]
-#  mean(ddply(.data=tmp,.var=c("system"),.fun=SLR)$V1)
-#  #+(cor(tmp$ener,tmp$rmsd))
-#}
-
 # Z-score
 Zscore <- function(tmp) {
     ((mean(tmp$ener[tmp$flag==1])-mean(tmp$ener[tmp$flag==0]))/sd(tmp$ener[tmp$flag==0]))
 }
 
 calZ <- function(eps) {
-  tmp <- comb[,c(-1,-2,-3)]
-  eps <- combineEPS(eps)
-  eps <- eps*mask
-  eps <- matrix(eps,nrow=nrow(tmp),ncol=ncol(tmp),byrow=T)
-  tmp <- data.frame(flag=comb[,1],system=comb[,2],rmsd=comb[,3],ener=rowSums(eps*tmp))
-  mean(ddply(.data=tmp,.var=c("system"),.fun=Zscore)$V1)
+    tmp <- comb[,c(-1,-2,-3)]
+	eps1 <- combineEPS(eps)
+  	eps2 <- combineEPS(ipars)
+  	eps1 <- eps1*mask
+  	eps2 <- eps2*mask2
+  	eps1 <- matrix(eps1,nrow=nrow(tmp),ncol=ncol(tmp),byrow=T)
+  	eps2 <- matrix(eps2,nrow=nrow(tmp),ncol=ncol(tmp),byrow=T)
+  	tmp <- data.frame(flag=comb[,1],system=comb[,2],rmsd=comb[,3],ener=(rowSums(eps1*tmp)+rowSums(eps2*tmp)))
+    mean(ddply(.data=tmp,.var=c("system"),.fun=Zscore)$V1)
 }
 
-fitnessZ <- function(eps) {
-  tmp <- comb[,c(-1,-2,-3)]
-  eps <- combineEPS(eps)
-  eps <- eps*mask
-  eps <- matrix(eps,nrow=nrow(tmp),ncol=ncol(tmp),byrow=T)
-  tmp <- data.frame(flag=comb[,1],system=comb[,2],rmsd=comb[,3],ener=rowSums(eps*tmp))
-  -1.0*mean(ddply(.data=tmp,.var=c("system"),.fun=Zscore)$V1)+(cor(tmp$ener,tmp$rmsd))+mean(ddply(.data=tmp,.var=c("system"),.fun=SLR)$V1)
+# Fitness function
+fitness <- function(eps) {
+  	tmp <- comb[,c(-1,-2,-3)]
+	eps1 <- combineEPS(eps)
+  	eps2 <- combineEPS(ipars)
+  	eps1 <- eps1*mask
+  	eps2 <- eps2*mask2
+  	eps1 <- matrix(eps1,nrow=nrow(tmp),ncol=ncol(tmp),byrow=T)
+  	eps2 <- matrix(eps2,nrow=nrow(tmp),ncol=ncol(tmp),byrow=T)
+  	tmp <- data.frame(flag=comb[,1],system=comb[,2],rmsd=comb[,3],ener=(rowSums(eps1*tmp)+rowSums(eps2*tmp)))
+    -1.0*mean(ddply(.data=tmp,.var=c("system"),.fun=Zscore)$V1)
+    #+(cor(tmp$ener,tmp$rmsd))+mean(ddply(.data=tmp,.var=c("system"),.fun=SLR)$V1)
 }
 
+# Calculate energy of ensemble
+# No mask
 calE <- function(eps) {
   tmp <- comb[,c(-1,-2,-3)]
   eps <- combineEPS(eps)
-  #eps <- eps*mask
   eps <- matrix(eps,nrow=nrow(tmp),ncol=ncol(tmp),byrow=T)
   tmp <- data.frame(flag=comb[,1],system=comb[,2],rmsd=comb[,3],ener=rowSums(eps*tmp))
 }
 
+# With mask
 calE2 <- function(eps1,eps2) {
 	# 1 = new; 2 = old params
   	tmp <- comb[,c(-1,-2,-3)]
@@ -128,6 +127,7 @@ calE2 <- function(eps1,eps2) {
   	eps2 <- matrix(eps2,nrow=nrow(tmp),ncol=ncol(tmp),byrow=T)
   	tmp <- data.frame(flag=comb[,1],system=comb[,2],rmsd=comb[,3],ener=(rowSums(eps1*tmp)+rowSums(eps2*tmp)))
 }
+
 
 #######################################################################
 # Read data
@@ -221,7 +221,7 @@ max <- rep(0,length(ipars))
 initialSolution <- matrix(ipars,ncol=length(ipars),nrow=popSize,byrow=F)
 
 # GA to assign weights; fitness function = Z-score
-GAReal <- ga(type = "real-valued", fitness=fitnessZ, min=min, max=max, popSize=popSize, maxiter=iters,suggestions=initialSolution,keepBest=T)
+GAReal <- ga(type = "real-valued", fitness=fitness, min=min, max=max, popSize=popSize, maxiter=iters,suggestions=initialSolution,keepBest=T)
 
 # Get value of cost function at each iteration
 Z <- NULL
