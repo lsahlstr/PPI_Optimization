@@ -76,24 +76,24 @@ fitnessZ <- function(eps){
 
 calE <- function(eps){
   tmp <- comb[,c(-1,-2,-3)]
-  #eps <- combineEPS(eps)
+  eps <- combineEPS(eps)
   eps <- matrix(eps,nrow=nrow(tmp),ncol=ncol(tmp),byrow=T)
   tmp <- data.frame(flag=comb[,1],system=comb[,2],rmsd=comb[,3],ener=rowSums(eps*tmp))
 }
 
 calE2 <- function(eps){
   tmp <- comb[,c(-1,-2,-3)]
-  #eps <- combineEPS(eps)
+  eps <- combineEPS(eps)
   eps <- matrix(eps,nrow=nrow(tmp),ncol=ncol(tmp),byrow=T)
   data.frame(flag=comb[,1],system=comb[,2],rmsd=comb[,3],ener=rowSums(eps*tmp))
 }
 
 # read in data 
-pdbs <- c("optfiles")
+pdbs <- c("~/go_interact/3gbn/gopair/optimize/GA_n50_nn147_nearn56_eij_Zscore/optfiles")
 for (p in seq_along(pdbs)){
     pdb <- pdbs[p]
     if (p==1){
-        ipars <- read.table(paste(pdb,"/eij.txt",sep=""))
+        ipars <- read.table(paste("eij.txt",sep=""))
         iparsRes <- ipars$V1
         ipars <- ipars$V2
         
@@ -133,7 +133,7 @@ comb <- comb[comb[,2]!=3,]
 popSize <- 10
 iters <- 1000
 min <- rep(0,length(ipars))
-max <- rep(10,length(ipars))
+max <- rep(0.35,length(ipars))
 initialSolution <- matrix(ipars,ncol=length(ipars),nrow=popSize,byrow=F)
 
 # use GA to assign weights
@@ -159,7 +159,7 @@ check$oldenergy <- calE(ipars)$ener
 
 check <- check[order(check$system,check$ener),]
 results <- data.frame(resname= iparsRes, eij_initial=ipars,eij_optimized=as.matrix(as.vector(GAReal@bestSol[[iters]][1,])))
-epars <- read.table(paste(pdb,"/eij.txt",sep=""),col.names=c("ijs","old_eij"))
+epars <- read.table(paste("eij.txt",sep=""),col.names=c("ijs","old_eij"))
 # modified here: GAReal@bestSol[[i]] to  GAReal@bestSol[[i]][1,]
 epars$new_eij <- as.vector(GAReal@bestSol[[iters]][1,])
 write.table(epars,file="parametersGA.txt",row.names=F,quote=F,col.names=F)
