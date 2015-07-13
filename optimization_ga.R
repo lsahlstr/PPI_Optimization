@@ -78,7 +78,7 @@ calE <- function(eps){
 }
 
 # read in data 
-pdbs <- c("~lsahlstr/go_interact/3gbn/gopair/optimize/GA_n50_nn147_nearn56_eij_Zscore/optfiles")
+pdbs <- c("~/go_interact/3gbn/gopair/optimize/GA_n50_nn147_nearn56_eij_Zscore/optfiles")
 for (p in seq_along(pdbs)){
     pdb <- pdbs[p]
     if (p==1){
@@ -120,7 +120,7 @@ comb <- comb[comb[,2]!=3,]
 
 # setup parameters for GA
 popSize <- 30
-iters <- 5000
+iters <- 100000
 min <- rep(0,length(ipars))
 max <- rep(1,length(ipars))
 initialSolution <- matrix(ipars,ncol=length(ipars),nrow=popSize,byrow=F)
@@ -133,7 +133,7 @@ n <- ncol(tmp_comb)
 # use GA to assign weights
 GAReal <- ga(type = "real-valued", fitness=fitnessZ2, min=min, max=max, popSize=popSize, maxiter=iters,suggestions=initialSolution,keepBest=T)
 
-stop()
+#stop()
 
 Z <- NULL
 for (i in 1:iters){
