@@ -1,5 +1,4 @@
 #!/export/apps/R/3.1.2/bin/Rscript
-
 #######################################################################
 # R script for implementing the Genetic Algorithm in the force-field 
 # optimization of coarse-grained protein-protein binding simulations.
