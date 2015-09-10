@@ -159,7 +159,8 @@ for (p in seq_along(pdbs)){
 		# Initial rmin values
         rmin_file <- read.table(opt$rmin)
         rmin <- rmin_file$V2
-        
+        rminSD <- rmin_file$V3
+              
         # Combine eps and rmin into a single data structure
         ipars <- c(eps,rmin)
         
@@ -221,8 +222,8 @@ for (i in 1:len) {
 		min_eps[i] <- opt$minval
 		max_eps[i] <- opt$maxval
 	} else {
-		min_rmin[(i-(len/2))] <- (ipars[i]-1.0)
-		max_rmin[(i-(len/2))] <- (ipars[i]+1.0)
+		min_rmin[(i-(len/2))] <- (ipars[i] - (0.5*rminSD[(i-(len/2))]))
+		max_rmin[(i-(len/2))] <- (ipars[i] + (0.5*rminSD[(i-(len/2))]))
 	}
 }
 min <- c(min_eps,min_rmin) 
