@@ -1,0 +1,85 @@
+* CHARMM script to grab native poses based on interface RMSD of
+* of the 3gbn HA complex. iRMSD < rmsdcut
+*     c. LS Ahlstrom 2015, Brooks Group U. Michigan
+*
+
+resize maxnbf @snbf
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! System setup
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Topology file
+open unit 10 read form name @top
+read rtf card unit 10
+close unit 10
+
+! Parameter file
+open unit 10 read form name @param
+bomlev -1
+read para card unit 10
+close unit 10
+
+! Sequence
+open unit 10 read form name "a.pdb"
+read sequ pdb unit 10
+generate   PROA setup warn
+close unit 10
+open unit 10 read form name "b.pdb"
+read sequ pdb unit 10
+generate   PROB setup warn
+close unit 10
+
+! Coordinates
+auto angle dihe
+open unit 10 read form name "a.pdb"
+read coor pdb unit 10 resi
+close unit 10
+open unit 10 read form name "b.pdb"
+read coor pdb unit 10 resi
+close unit 10
+
+! Save a copy to the coordinate COMParison set
+coor copy comp
+
+! Dihedral correction and SS bonds
+open unit 78 read form name "dihe_ss.str"
+stream unit 78
+
+bomlev -2
+faster on
+eten on  ! Turn on 12-10-6 potential
+update atom cdie eps 1 cutnb 25 ctofnb 23 ctonnb 21 switch vswitch
+shake bond tol 1e-06 param
+
+! Open file for writing rmsd-from-native and energy
+open write unit 21 card name nn.@trajname.rmsd
+echu 21
+
+! Open trajectory for writing non-native poses
+open write unit 32 unform name nn.@trajname.dcd
+
+! Open trajectory for reading and loop through each frame
+open read unit 22 unform name @trajname.dcd
+trajectory first 22 nunit 1 iwrite 32
+
+! Interface selection
+open unit 79 read form name "interf.str"
+stream unit 79
+
+set l 1 
+label loop
+traj read
+    coor orient rms sele sel1 show end
+    coor rms sele sel1 show end
+    if ?rms gt @rmsdcut then
+        coor dist cut @dcut sele segid PROA end sele segid PROB end
+        if ?npair gt 0 then
+            echo @l ?rms 
+            traj write
+        endif
+    endif
+
+incr l by 1
+if l le @lfra goto loop
+
+stop
