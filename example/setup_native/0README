@@ -1,0 +1,56 @@
+# Links
+for i in {0..4}; do
+    ln -s /export/nVerde/users/lsahlstr/go_interact/1lmb/gopair/2.0.0.0.0.2/init${i}/data/2.0.0.0.0.2.recenter.dcd init${i}.dcd
+done
+
+qsub -I -q test -l nodes=1:ppn=8
+cd $PBS_O_WORKDIR
+
+# Load modules, set paths
+module load MMTSB
+module load Intel
+module load Openmpi
+module load Cluster/0.0.1
+module load HDF5/1.8.8
+module load Python/2.7.2-CentOS6.0
+module load R/2.13.0
+CHARMMEXEC=/export/nVerde/users/lsahlstr/apps/charmm/exec/em64t_M/charmm
+
+# Get native poses
+for i in {0..4}
+do
+    echo $i
+    $CHARMMEXEC snbf=100000 top=rename.go_1lmb.top param=1.0.0.0.0.2.param trajname=init${i} lfra=100000 rmsdcut=4.0 < get_native_irmsd.inp > /dev/null 2>&1
+done
+gzip ?.log
+
+# Clustering
+./setup_DCD_native.sh 1lmb
+ConvertDataToHDF.py -S file_dcd -s template.pdb -i DCD
+./MakeAtomIndices.pl 174 > AtomIndices.dat
+Cluster.py rmsd hybrid -d 0.6
+cd Data
+make_readable.py
+cd ../
+BuildMSM.py -l 1
+cat Data/Populations.dat
+SaveStructures.py -s -1 -c 50
+
+# Check states
+pdb2traj.pl -out 0.clust.dcd PDBs/State0*.pdb
+pdb2traj.pl -out 1.clust.dcd PDBs/State1*.pdb
+pdb2traj.pl -out 2.clust.dcd PDBs/State2*.pdb
+pdb2traj.pl -out 3.clust.dcd PDBs/State3*.pdb
+pdb2traj.pl -out 4.clust.dcd PDBs/State4*.pdb
+pdb2traj.pl -out 5.clust.dcd PDBs/State5*.pdb
+
+
+# Checked in VMD,
+pdb2traj.pl -out n.clust.dcd PDBs/State5*.pdb
+
+# Get "fij" information
+$CHARMMEXEC snbf=100000 top=rename.go_1lmb.top param=1.0.0.0.0.2.param trajname=n.clust.dcd lfra=50 < pairdist.inp | grep -e '^ *[0-9]\+ PROA' | awk '{print $3,$9,$12}' > pairdist.out
+./split_pairdist.pl A92 B92 50
+./run_fij.sh 50
+
+./run_rij.sh 50
