@@ -1,0 +1,44 @@
+* interface selection
+*
+
+! Interface residue selection
+define sel1 sele segid PROA .and. -
+(resid 59 .or. -
+resid 60 .or. -
+resid 63 .or. -
+resid 66 .or. -
+resid 67 .or. -
+resid 72 .or. -
+resid 73 .or. -
+resid 74 .or. -
+resid 81 .or. -
+resid 83 .or. -
+resid 84 .or. -
+resid 85 .or. -
+resid 86 .or. -
+resid 87 .or. -
+resid 88 .or. -
+resid 89 .or. -
+resid 90 .or. -
+resid 91 .or. -
+resid 92) .or. -
+segid PROB .and. -
+(resid 59 .or. -
+resid 60 .or. -
+resid 63 .or. -
+resid 66 .or. -
+resid 67 .or. -
+resid 72 .or. -
+resid 73 .or. -
+resid 74 .or. -
+resid 81 .or. -
+resid 83 .or. -
+resid 84 .or. -
+resid 85 .or. -
+resid 86 .or. -
+resid 87 .or. -
+resid 88 .or. -
+resid 89 .or. -
+resid 90 .or. -
+resid 91 .or. -
+resid 92) show end
