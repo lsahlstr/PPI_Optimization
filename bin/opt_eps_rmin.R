@@ -181,30 +181,32 @@ save(GAReal,file="GA.RData")
 # Summarize results
 #######################################################################
 # Get value of Z-score at each iteration
-score <- NULL
+zscore <- NULL
+slr <- NULL
 if (potFlag == "eten") {
-	if (fitFlag == "zscore") {
+	#if (fitFlag == "zscore") {
 		for (i in 1:iters) {
-			score <- c(score,calZ_eten(as.vector(GAReal@bestSol[[i]][1,])))
+			zscore <- c(zscore,calZ_eten(as.vector(GAReal@bestSol[[i]][1,])))
 		}
-	} else {
+	#} else {
 		for (i in 1:iters) {
-			score <- c(score,calSLR_eten(as.vector(GAReal@bestSol[[i]][1,])))
+			slr <- c(slr,calSLR_eten(as.vector(GAReal@bestSol[[i]][1,])))
 		}
-	}
+	#}
 } else {
-	if (fitFlag == "zscore") {
+	#if (fitFlag == "zscore") {
 		for (i in 1:iters) {
-			score <- c(score,calZ_lj(as.vector(GAReal@bestSol[[i]][1,])))
+			zscore <- c(zscore,calZ_lj(as.vector(GAReal@bestSol[[i]][1,])))
 		}
-	} else {
+	#} else {
 		for (i in 1:iters) {
-			score <- c(score,calSLR_lj(as.vector(GAReal@bestSol[[i]][1,])))
+			slr <- c(slr,calSLR_lj(as.vector(GAReal@bestSol[[i]][1,])))
 		}
-	}
+	#}
 }
 
-score <- data.frame(iters=1:iters,score=score)
+zscore <- data.frame(iters=1:iters,score=zscore)
+slr <- data.frame(iters=1:iters,score=slr)
 
 
 #######################################################################
@@ -230,7 +232,8 @@ results <- data.frame(respair=iparsRes,
 
 write.table(results,file="InitOptComp.txt",row.names=F,quote=F,col.names=T)
 write.table(check,file="rmsdEnerComp.txt",row.names=F,quote=F,col.names=F)
-write.table(score,file="score.txt",row.names=F,quote=F,col.names=F)
+write.table(zscore,file="zscore.dat",row.names=F,quote=F,col.names=F)
+write.table(slr,file="slr.dat",row.names=F,quote=F,col.names=F)
 
 cat("Done!\n")
 cat(sprintf("%s\n\n",date()))
