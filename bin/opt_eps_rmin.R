@@ -47,6 +47,8 @@ option_list <- list(
         help="Lower boundary/minimum value for epsilon parameter [default %default]"),
     make_option(c("-l", "--list"), type="character", default="pdblist",
 		help="One-column file listing the sub-directories for each system to be included in the optimization [default %default]")
+	#make_option(c("-g", "--gentle"), type="character", default="T",
+	#	help="True/False flag for gentle optimization [default %default]")
 )
 parser <- OptionParser(usage = "%prog [options] epsilonFile rminFile maskFile potentialType", option_list=option_list)
 arguments <- parse_args(parser, positional_arguments = TRUE)
@@ -125,7 +127,7 @@ for (p in seq_along(pdbs)){
 tmp_r12 <- r12[,c(-1,-2,-3)]
 tmp_info <- data.frame(flag=r12[,1],system=r12[,2],rmsd=r12[,3])
 
-# Get size (m x n) for defining eps and rmin matrices in subroutines above
+# Get size (m x n) for defining eps and rmin matrices in energy and fitness function subroutines
 m <- nrow(tmp_r12)
 n <- ncol(tmp_r12)
 
@@ -145,8 +147,8 @@ max_rmin <- NULL
 len <- length(ipars)
 for (i in 1:len) {
 	if (i <= (len/2)) {
-		min_eps[i] <- opt$minval
-		max_eps[i] <- opt$maxval
+		min_eps[i] <- (ipars[i] - (0.5*ipars[i])) # opt$minval
+		max_eps[i] <- (ipars[i] + (0.5*ipars[i])) # opt$maxval
 	} else {
 		min_rmin[(i-(len/2))] <- (ipars[i] - (0.5*rminSD[(i-(len/2))]))
 		max_rmin[(i-(len/2))] <- (ipars[i] + (0.5*rminSD[(i-(len/2))]))
@@ -230,6 +232,7 @@ results <- data.frame(respair=iparsRes,
 	rij_initial=ipars[((len/2)+1):len],
 	rij_optimized=bestPars[((len/2)+1):len])
 
+save(list=c("ipars","bestPars","min","max","list","check","results"),file="check.RData")
 write.table(results,file="InitOptComp.txt",row.names=F,quote=F,col.names=T)
 write.table(check,file="rmsdEnerComp.txt",row.names=F,quote=F,col.names=F)
 write.table(zscore,file="zscore.dat",row.names=F,quote=F,col.names=F)

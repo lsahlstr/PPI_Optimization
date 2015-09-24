@@ -109,7 +109,7 @@ fitnessZ_eten <- function(pars) {
 	tmp_r6 <- r6[,c(-1,-2,-3)]
 	tmp3 <- r6min*tmp_r6
 	
-	tmp4 <- (eps*(13*tmp1 - 18*tmp2 + 4*tmp3))
+	tmp4 <- eps*((13*tmp1) - (18*tmp2) + (4*tmp3))
 		
 	tmp <- tmp_info	
 	tmp$ener <- rowSums(tmp4)
@@ -138,7 +138,7 @@ fitnessSLR_eten <- function(pars) {
 	tmp_r6 <- r6[,c(-1,-2,-3)]
 	tmp3 <- r6min*tmp_r6
 	
-	tmp4 <- (eps*(13*tmp1 - 18*tmp2 + 4*tmp3))
+	tmp4 <- eps*((13*tmp1) - (18*tmp2) + (4*tmp3))
 		
 	tmp <- tmp_info	
 	tmp$ener <- rowSums(tmp4)
@@ -224,7 +224,7 @@ calZ_eten <- function(pars){
 	tmp_r6 <- r6[,c(-1,-2,-3)]
 	tmp3 <- r6min*tmp_r6
 	
-	tmp4 <- (eps*(13*tmp1 - 18*tmp2 + 4*tmp3))
+	tmp4 <- eps*((13*tmp1) - (18*tmp2) + (4*tmp3))
 	
 	tmp <- tmp_info	
 	tmp$ener <- rowSums(tmp4)
@@ -253,7 +253,7 @@ calSLR_eten <- function(pars){
 	tmp_r6 <- r6[,c(-1,-2,-3)]
 	tmp3 <- r6min*tmp_r6
 	
-	tmp4 <- (eps*(13*tmp1 - 18*tmp2 + 4*tmp3))
+	tmp4 <- eps*((13*tmp1) - (18*tmp2) + (4*tmp3))
 	
 	tmp <- tmp_info	
 	tmp$ener <- rowSums(tmp4)
@@ -311,7 +311,7 @@ calE_eten <- function(pars) {
 	tmp_r6 <- r6[,c(-1,-2,-3)]
 	tmp3 <- r6min*tmp_r6
 	
-	tmp4 <- (eps*(13*tmp1 - 18*tmp2 + 4*tmp3))
+	tmp4 <- eps*((13*tmp1) - (18*tmp2) + (4*tmp3))
 	
 	tmp <- data.frame(flag=tmp_info[,1],system=tmp_info[,2],rmsd=tmp_info[,3],ener=rowSums(tmp4))
 
