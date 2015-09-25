@@ -46,9 +46,9 @@ option_list <- list(
     make_option(c("-o", "--minval"), type="double", default=0,
         help="Lower boundary/minimum value for epsilon parameter [default %default]"),
     make_option(c("-l", "--list"), type="character", default="pdblist",
-		help="One-column file listing the sub-directories for each system to be included in the optimization [default %default]")
-	#make_option(c("-g", "--gentle"), type="character", default="T",
-	#	help="True/False flag for gentle optimization [default %default]")
+		help="One-column file listing the sub-directories for each system to be included in the optimization [default %default]"),
+	make_option(c("-t", "--opttype"), type="character", default="gentle",
+		help="Flag for optimization type: gentle (refinement) or stringent [default %default]")
 )
 parser <- OptionParser(usage = "%prog [options] epsilonFile rminFile maskFile potentialType", option_list=option_list)
 arguments <- parse_args(parser, positional_arguments = TRUE)
@@ -104,6 +104,9 @@ for (p in seq_along(pdbs)){
 		
 		# Fitness function
 		fitFlag <- opt$fitness
+		
+		# Gentle or stringent optimization
+		opttypeFlag <- opt$opttype
         
         list <- readDistRMSDinfo(pdb,p,potFlag)
        
@@ -154,13 +157,19 @@ min_eps <- NULL
 max_eps <- NULL
 min_rmin <- NULL
 max_rmin <- NULL
+
 len <- length(ipars)
 for (i in 1:len) {
-	if (i <= (len/2)) {
-		min_eps[i] <- opt$minval
-		max_eps[i] <- opt$maxval
-		#min_eps[i] <- (ipars[i] - (0.5*ipars[i])) # opt$minval
-		#max_eps[i] <- (ipars[i] + (0.5*ipars[i])) # opt$maxval
+	# eps
+	if (i <= (len/2)) {	
+		if (opttypeFlag == "gentle") {
+			min_eps[i] <- (ipars[i] - (0.5*ipars[i])) # opt$minval
+			max_eps[i] <- (ipars[i] + (0.5*ipars[i])) # opt$maxval
+		} else {
+			min_eps[i] <- opt$minval
+			max_eps[i] <- opt$maxval
+		}
+	# rmin		
 	} else {
 		min_rmin[(i-(len/2))] <- (ipars[i] - (0.5*rminSD[(i-(len/2))]))
 		max_rmin[(i-(len/2))] <- (ipars[i] + (0.5*rminSD[(i-(len/2))]))
