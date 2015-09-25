@@ -111,25 +111,35 @@ for (p in seq_along(pdbs)){
 		list <- readDistRMSDinfo(pdb,p,potFlag)    
     }
     
-    if (potFlag == "eten") {
-		#r112 <- list$r112
-		r12 <- list$r12
-		r10 <- list$r10
-		r6 <- list$r6
-    } else {
-    	r12 <- list$r12
-		r6 <- list$r6
-    }
+    r12 <- list$r12
+    r12_test <- list$r12_test
+    r6 <- list$r6
+    r6_test <- list$r6_test
     
+    if (potFlag == "eten") {
+		r10 <- list$r10
+		r10_test <- list$r10_test
+    }    
 }
 
 # Get flag, system, and rmsd info
-tmp_r12 <- r12[,c(-1,-2,-3)]
+# Training set: first three columns of r12
 tmp_info <- data.frame(flag=r12[,1],system=r12[,2],rmsd=r12[,3])
 
+# Testing set: first three columns of r12_test
+tmp_info_test <- data.frame(flag=r12_test[,1],system=r12_test[,2],rmsd=r12_test[,3])
+
+
 # Get size (m x n) for defining eps and rmin matrices in energy and fitness function subroutines
+# For training set
+tmp_r12 <- r12[,c(-1,-2,-3)]
 m <- nrow(tmp_r12)
 n <- ncol(tmp_r12)
+
+# For testing set
+tmp_r12_test <- r12_test[,c(-1,-2,-3)]
+m_test <- nrow(tmp_r12_test)
+n_test <- ncol(tmp_r12_test)
 
 
 #######################################################################
@@ -147,8 +157,10 @@ max_rmin <- NULL
 len <- length(ipars)
 for (i in 1:len) {
 	if (i <= (len/2)) {
-		min_eps[i] <- (ipars[i] - (0.5*ipars[i])) # opt$minval
-		max_eps[i] <- (ipars[i] + (0.5*ipars[i])) # opt$maxval
+		min_eps[i] <- opt$minval
+		max_eps[i] <- opt$maxval
+		#min_eps[i] <- (ipars[i] - (0.5*ipars[i])) # opt$minval
+		#max_eps[i] <- (ipars[i] + (0.5*ipars[i])) # opt$maxval
 	} else {
 		min_rmin[(i-(len/2))] <- (ipars[i] - (0.5*rminSD[(i-(len/2))]))
 		max_rmin[(i-(len/2))] <- (ipars[i] + (0.5*rminSD[(i-(len/2))]))
@@ -161,22 +173,25 @@ max <- c(max_eps,max_rmin)
 initialSolution <- matrix(ipars,ncol=length(ipars),nrow=popSize,byrow=T)  # ipars_mask
 
 # GA to assign weights; fitness function = Z-score for single system
+ffunc <- NULL
 if (potFlag == "eten") {
 	if (fitFlag == "zscore") {
-    	GAReal <- ga(type = "real-valued", fitness=fitnessZ_eten, min=min, max=max, popSize=popSize, maxiter=iters, suggestions=initialSolution, keepBest=T)
+		ffunc <- fitnessZ_eten
     } else {
-		GAReal <- ga(type = "real-valued", fitness=fitnessSLR_eten, min=min, max=max, popSize=popSize, maxiter=iters, suggestions=initialSolution, keepBest=T)
+    	ffunc <- fitnessSLR_eten
 	}
-    	
 } else {
 	if (fitFlag == "zscore") {
-    	GAReal <- ga(type = "real-valued", fitness=fitnessZ_lj, min=min, max=max, popSize=popSize, maxiter=iters, suggestions=initialSolution, keepBest=T)
+		ffunc <- fitnessZ_lj
     } else {
-		GAReal <- ga(type = "real-valued", fitness=fitnessSLR_lj, min=min, max=max, popSize=popSize, maxiter=iters, suggestions=initialSolution, keepBest=T)
+    	ffunc <- fitnessSLR_lj
 	}
 }
 
-# Save data from 
+# Run GA
+GAReal <- ga(type = "real-valued", fitness=ffunc, min=min, max=max, popSize=popSize, maxiter=iters, suggestions=initialSolution, keepBest=T) 
+
+# Save data from all GA cycles to R data structure
 save(GAReal,file="GA.RData")
 
 #######################################################################
@@ -210,31 +225,51 @@ if (potFlag == "eten") {
 zscore <- data.frame(iters=1:iters,score=zscore)
 slr <- data.frame(iters=1:iters,score=slr)
 
-
-#######################################################################
-# Compare initial ("old") and optimized ("best") parameters and save results
-#######################################################################
+# Best solution from GA optimization
 bestPars <- as.vector(GAReal@bestSol[[iters]][1,])
 
+
+#######################################################################
+# Compute energies with initial ("old") and optimized ("new") parameters
+# and combine with RMSD and system information. Organize energy and RMSD 
+# information and old and new parameters, and then write to output files.
+#######################################################################
+# RMSD and energy
 if (potFlag == "eten") {
-	check <- calE_eten(bestPars)
-	check$oldenergy <- calE_eten(ipars)$ener
+	
+	rmsd_ener <- calE_eten(bestPars,r12,r10,r6,m,n,tmp_info)
+	rmsd_ener$oldenergy <- calE_eten(ipars,r12,r10,r6,m,n,tmp_info)$ener
+	
+	rmsd_ener_test <- calE_eten(bestPars,r12_test,r10_test,r6_test,m_test,n_test,tmp_info_test)
+	rmsd_ener_test$oldenergy <- calE_eten(ipars,r12_test,r10_test,r6_test,m_test,n_test,tmp_info_test)$ener
+	
 } else {
-	check <- calE_lj(bestPars)
-	check$oldenergy <- calE_lj(ipars)$ener
+
+	rmsd_ener <- calE_lj(bestPars,r12,r6,m,n,tmp_info)
+	rmsd_ener$oldenergy <- calE_lj(ipars,r12,r6,m,n,tmp_info)$ener
+	
+	rmsd_ener_test <- calE_lj(bestPars,r12_test,r6_test,m_test,n_test,tmp_info_test)
+	rmsd_ener_test$oldenergy <- calE_lj(ipars,r12_test,r6_test,m_test,n_test,tmp_info_test)$ener
+	
 }
 
-check <- check[order(check$system,check$ener),]
+rmsd_ener <- rmsd_ener[order(rmsd_ener$system,rmsd_ener$ener),]
+rmsd_ener_test <- rmsd_ener_test[order(rmsd_ener_test$system,rmsd_ener_test$ener),]
 
-results <- data.frame(respair=iparsRes, 
+# Old and new parameters
+old_new <- data.frame(respair=iparsRes, 
 	eij_initial=ipars[1:(len/2)], 
 	eij_optimized=bestPars[1:(len/2)],
 	rij_initial=ipars[((len/2)+1):len],
 	rij_optimized=bestPars[((len/2)+1):len])
 
-save(list=c("ipars","bestPars","min","max","list","check","results"),file="check.RData")
-write.table(results,file="InitOptComp.txt",row.names=F,quote=F,col.names=T)
-write.table(check,file="rmsdEnerComp.txt",row.names=F,quote=F,col.names=F)
+# Save environment variables to R data structure
+save(list=c("ipars","bestPars","min","max","list","rmsd_ener","old_new"),file="check.RData")
+
+# Write to output files
+write.table(old_new,file="OldNewComp.txt",row.names=F,quote=F,col.names=T)
+write.table(rmsd_ener,file="rmsdEnerComp.txt",row.names=F,quote=F,col.names=F)
+write.table(rmsd_ener_test,file="rmsdEnerComp_test.txt",row.names=F,quote=F,col.names=F)
 write.table(zscore,file="zscore.dat",row.names=F,quote=F,col.names=F)
 write.table(slr,file="slr.dat",row.names=F,quote=F,col.names=F)
 

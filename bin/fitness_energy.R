@@ -268,7 +268,7 @@ calSLR_eten <- function(pars){
 # Routines to evaluate energies after optimization
 #######################################################################
 ## 12-6 potential ##
-calE_lj <- function(pars) {
+calE_lj <- function(pars,r12,r6,m,n,tmp_info) {
 
 	list <- combinePARS(pars)
 	eps <- list$eps
@@ -291,7 +291,7 @@ calE_lj <- function(pars) {
 }
 
 ## 12-10-6 potential ##
-calE_eten <- function(pars) {
+calE_eten <- function(pars,r12,r10,r6,m,n,tmp_info) {
 
 	list <- combinePARS(pars)
 	eps <- list$eps

@@ -40,13 +40,31 @@ readDistRMSDinfo <- function(pdb,p,potFlag) {
 	nonnative_r12 <- data.matrix(nonnative_r12[2:nrow(nonnative_r12),])
 	nonnative_r12 <- cbind(rep(0,nrow(nonnative_r12)),cbind(rep(p,nrow(nonnative_r12)),cbind(nonnativeRMSD,nonnative_r12)))
 	
+	testidx_native <- sample(1:nrow(native_r12),10)
+	testidx_nonnative <- sample(1:nrow(nonnative_r12),10)
+	
+	# Separate r^12 into training and testing sets
+	native_r12_test <- native_r12[testidx_native,]
+	native_r12 <- native_r12[-testidx_native,]
+	
+	nonnative_r12_test <- nonnative_r12[testidx_nonnative,]
+	nonnative_r12 <- nonnative_r12[-testidx_nonnative,]
+	
 	if (p==1){
 		r12 <- as.matrix(rbind(native_r12,nonnative_r12))
 		r12 <- matrix(as.numeric(r12),ncol=ncol(r12),nrow=nrow(r12),byrow=F)
+		
+		r12_test <- as.matrix(rbind(native_r12_test,nonnative_r12_test))
+		r12_test <- matrix(as.numeric(r12_test),ncol=ncol(r12_test),nrow=nrow(r12_test),byrow=F)
+		
 	} else {
 		tmp <- as.matrix(rbind(native_r12,nonnative_r12))
         tmp <- matrix(as.numeric(tmp),ncol=ncol(tmp),nrow=nrow(tmp),byrow=F)
         r12 <- rbind(r12,tmp)
+        
+        tmp <- as.matrix(rbind(native_r12_test,nonnative_r12_test))
+        tmp <- matrix(as.numeric(tmp),ncol=ncol(tmp),nrow=nrow(tmp),byrow=F)
+        r12_test <- rbind(r12_test,tmp)
 	}
 	
 	# rij^6
@@ -58,13 +76,28 @@ readDistRMSDinfo <- function(pdb,p,potFlag) {
 	nonnative_r6 <- data.matrix(nonnative_r6[2:nrow(nonnative_r6),])
 	nonnative_r6 <- cbind(rep(0,nrow(nonnative_r6)),cbind(rep(p,nrow(nonnative_r6)),cbind(nonnativeRMSD,nonnative_r6)))
 	
+	# Separate r^6 into training and testing sets
+	native_r6_test <- native_r6[testidx_native,]
+	native_r6 <- native_r6[-testidx_native,]
+	
+	nonnative_r6_test <- nonnative_r6[testidx_nonnative,]
+	nonnative_r6 <- nonnative_r6[-testidx_nonnative,]
+	
 	if (p==1){
 		r6 <- as.matrix(rbind(native_r6,nonnative_r6))
 		r6 <- matrix(as.numeric(r6),ncol=ncol(r6),nrow=nrow(r6),byrow=F)
+		
+		r6_test <- as.matrix(rbind(native_r6_test,nonnative_r6_test))
+		r6_test <- matrix(as.numeric(r6_test),ncol=ncol(r6_test),nrow=nrow(r6_test),byrow=F)
+		
 	} else {
 		tmp <- as.matrix(rbind(native_r6,nonnative_r6))
         tmp <- matrix(as.numeric(tmp),ncol=ncol(tmp),nrow=nrow(tmp),byrow=F)
         r6 <- rbind(r6,tmp)
+        
+        tmp <- as.matrix(rbind(native_r6_test,nonnative_r6_test))
+        tmp <- matrix(as.numeric(tmp),ncol=ncol(tmp),nrow=nrow(tmp),byrow=F)
+        r6_test <- rbind(r6_test,tmp)
 	}
 	
 	if (potFlag == "eten") {
@@ -77,19 +110,34 @@ readDistRMSDinfo <- function(pdb,p,potFlag) {
 		nonnative_r10 <- data.matrix(nonnative_r10[2:nrow(nonnative_r10),])
 		nonnative_r10 <- cbind(rep(0,nrow(nonnative_r10)),cbind(rep(p,nrow(nonnative_r10)),cbind(nonnativeRMSD,nonnative_r10)))
 	
+		# Separate r^10 into training and testing sets
+		native_r10_test <- native_r10[testidx_native,]
+		native_r10 <- native_r10[-testidx_native,]
+	
+		nonnative_r10_test <- nonnative_r10[testidx_nonnative,]
+		nonnative_r10 <- nonnative_r10[-testidx_nonnative,]
+	
 		if (p==1){
 			r10 <- as.matrix(rbind(native_r10,nonnative_r10))
 			r10 <- matrix(as.numeric(r10),ncol=ncol(r10),nrow=nrow(r10),byrow=F)
+		
+			r10_test <- as.matrix(rbind(native_r10_test,nonnative_r10_test))
+			r10_test <- matrix(as.numeric(r10_test),ncol=ncol(r10_test),nrow=nrow(r10_test),byrow=F)
+		
 		} else {
 			tmp <- as.matrix(rbind(native_r10,nonnative_r10))
 			tmp <- matrix(as.numeric(tmp),ncol=ncol(tmp),nrow=nrow(tmp),byrow=F)
 			r10 <- rbind(r10,tmp)
+		
+			tmp <- as.matrix(rbind(native_r10_test,nonnative_r10_test))
+			tmp <- matrix(as.numeric(tmp),ncol=ncol(tmp),nrow=nrow(tmp),byrow=F)
+			r10_test <- rbind(r10_test,tmp)
 		}
 	
-		list <- list(r12=r12,r10=r10,r6=r6)
+		list <- list(r12=r12,r12_test=r12_test,r10=r10,r10_test=r10_test,r6=r6,r6_test=r6_test)
 	
 	} else {
-		list <- list(r12=r12,r6=r6)
+		list <- list(r12=r12,r12_test=r12_test,r6=r6,r6_test=r6_test)
     }
     
     return(list)
