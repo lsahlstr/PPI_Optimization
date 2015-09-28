@@ -45,7 +45,7 @@ foreach my $pdb (@pdbs) {
 	`mkdir native`;
 	`sort -g -k 9 tmp.out | head > tmp.native`;
 	`cat tmp.header tmp.native | awk '{print \$1,\$2,\$3,\$4,\$5,\$6,\$7}' > native.out`;
-	`cat tmp.header tmp.native | awk '{print \$8,\$9}' > ../n_rmsd.dat`;
+	`cat tmp.header tmp.native | awk '{print \$8,\$9}' > n_rmsd.dat`;
 	# Generate complexes from Zdock output
 	`./create.pl native.out`;
 	`mv complex*pdb native`;
@@ -93,7 +93,7 @@ foreach my $pdb (@pdbs) {
 	# Combine near- and far from-native
 	`cat tmp.nearn2 tmp.nn2 > tmp.nearn.nn`;
  	`cat tmp.header tmp.nearn.nn | awk '{print \$1,\$2,\$3,\$4,\$5,\$6,\$7}' > nonnative.out`;
- 	`cat tmp.header tmp.nearn.nn | awk '{print \$8,\$9}' > ../nn_rmsd.dat`;
+ 	`cat tmp.header tmp.nearn.nn | awk '{print \$8,\$9}' > nn_rmsd.dat`;
  	# Generate complexes from Z-dock output
  	`./create.pl nonnative.out`;
  	`mv complex*pdb nonnative`;
