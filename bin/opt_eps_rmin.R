@@ -78,6 +78,8 @@ pdbs <- read.table(opt$list)$V1
 for (p in seq_along(pdbs)){
     pdb <- pdbs[p]
     
+    cat(sprintf("%s\n",pdbs[p]))
+    
     if (p==1){
         
         # Initial eps values
@@ -163,16 +165,16 @@ for (i in 1:len) {
 	# eps
 	if (i <= (len/2)) {	
 		if (opttypeFlag == "gentle") {
-			min_eps[i] <- (ipars[i] - (0.5*ipars[i])) # opt$minval
-			max_eps[i] <- (ipars[i] + (0.5*ipars[i])) # opt$maxval
+			min_eps[i] <- (ipars[i] - (1.0*ipars[i])) # opt$minval
+			max_eps[i] <- (ipars[i] + (1.0*ipars[i])) # opt$maxval
 		} else {
 			min_eps[i] <- opt$minval
 			max_eps[i] <- opt$maxval
 		}
 	# rmin		
 	} else {
-		min_rmin[(i-(len/2))] <- (ipars[i] - (0.5*rminSD[(i-(len/2))]))
-		max_rmin[(i-(len/2))] <- (ipars[i] + (0.5*rminSD[(i-(len/2))]))
+		min_rmin[(i-(len/2))] <- (ipars[i] - (1.0*rminSD[(i-(len/2))]))
+		max_rmin[(i-(len/2))] <- (ipars[i] + (1.0*rminSD[(i-(len/2))]))
 	}
 }
 min <- c(min_eps,min_rmin) 
@@ -210,25 +212,19 @@ save(GAReal,file="GA.RData")
 zscore <- NULL
 slr <- NULL
 if (potFlag == "eten") {
-	#if (fitFlag == "zscore") {
-		for (i in 1:iters) {
-			zscore <- c(zscore,calZ_eten(as.vector(GAReal@bestSol[[i]][1,])))
-		}
-	#} else {
-		for (i in 1:iters) {
-			slr <- c(slr,calSLR_eten(as.vector(GAReal@bestSol[[i]][1,])))
-		}
-	#}
+	for (i in 1:iters) {
+		zscore <- c(zscore,calZ_eten(as.vector(GAReal@bestSol[[i]][1,])))
+	}
+	for (i in 1:iters) {
+		slr <- c(slr,calSLR_eten(as.vector(GAReal@bestSol[[i]][1,])))
+	}
 } else {
-	#if (fitFlag == "zscore") {
-		for (i in 1:iters) {
-			zscore <- c(zscore,calZ_lj(as.vector(GAReal@bestSol[[i]][1,])))
-		}
-	#} else {
-		for (i in 1:iters) {
-			slr <- c(slr,calSLR_lj(as.vector(GAReal@bestSol[[i]][1,])))
-		}
-	#}
+	for (i in 1:iters) {
+		zscore <- c(zscore,calZ_lj(as.vector(GAReal@bestSol[[i]][1,])))
+	}
+	for (i in 1:iters) {
+		slr <- c(slr,calSLR_lj(as.vector(GAReal@bestSol[[i]][1,])))
+	}
 }
 
 zscore <- data.frame(iters=1:iters,score=zscore)

@@ -35,6 +35,8 @@ foreach my $pdb (@pdbs) {
 	`cp -p $zdock_dir/results/$zdock_out .`;
 	`cp -p $zdock_dir/results/$zdock_rmsds .`;
 	
+	`cp -p $exec_dir/my-create.pl .`;
+	
 	# Combine Zdock output and RMSD files
 	`head -n 5 $zdock_out > tmp.header`;
 	`cat tmp.header $zdock_rmsds > tmp.rmsds`;
@@ -43,40 +45,33 @@ foreach my $pdb (@pdbs) {
 	#### Native-like ensemble ####
 	print "Native ensemble\n";
 	`mkdir native`;
+	# Sort based upon RMSD values to get native-like poses
 	`sort -g -k 9 tmp.out | head > tmp.native`;
-	`cat tmp.header tmp.native | awk '{print \$1,\$2,\$3,\$4,\$5,\$6,\$7}' > native.out`;
-	`cat tmp.header tmp.native | awk '{print \$8,\$9}' > n_rmsd.dat`;
-	# Generate complexes from Zdock output
-	`./create.pl native.out`;
-	`mv complex*pdb native`;
-	
+	# ZDOCK out file for natives
+	`awk '{print \$1,\$2,\$3,\$4,\$5,\$6,\$7}' tmp.native > tmp.native2`;
+	`cat tmp.header tmp.native2 > native.out`;
+	# RMSD file for natives
+	`awk '{print \$8,\$9}' tmp.native > n_rmsd.dat`;
+	# Generate complexes from ZDOCK out file
+	`./my-create.pl native.out`;
+	`mv complex*pdb lig.*.pdb native`;
+	# Get pairwise distance information for the complexes
 	chdir "native";
 	for my $i (1..$Nstructs_n) {
 		print "$i ";
-		if ($i == 1) {
-			# TER line at top of pdb gives the number of ATOM lines in first chain
-			# cat -v because ^M formatting
-			$n = `cat -v complex.1.pdb | head -n 1 | awk '{print \$2}'`;
-			chomp $n;
-			$last_a = $n -1;
-			$first_b = $n;
-			#print "$n\n";
-		}
-		# Only the ligand PDB is different for each complex. But it is currently unclear if 
-		# the first molecule in complex.pdb is always the receptor and the second is always
-		# the ligand. So here we construct both molecules from each complex.
-		`grep '^ATOM' complex.$i.pdb | head -n $last_a | grep ' CA ' > a.$i.pdb`;
-		`grep '^ATOM' complex.$i.pdb | tail -n +$first_b | grep ' CA ' > b.$i.pdb`;
-		`$exec_dir/PairDist.pl a.$i.pdb b.$i.pdb $exec_dir/aa_pairs.txt`; # > pairdist.$i.out`;
+		`$exec_dir/PairDist.pl ../rec.pdb lig.$i.pdb $exec_dir/aa_pairs.txt`; # > pairdist.$i.out`;
 		`mv r12ij.txt r12ij.$i.txt`;
 		`mv r10ij.txt r10ij.$i.txt`;
 		`mv r6ij.txt r6ij.$i.txt`;
-		`rm a.$i.pdb b.$i.pdb`;
 	}
+	# Combine rij information from all non-native complexes
 	`$exec_dir/CombineRij.sh $Nstructs_n`;
 	`mv r12ij.txt ../n_r12ij.txt`;
 	`mv r10ij.txt ../n_r10ij.txt`;
 	`mv r6ij.txt ../n_r6ij.txt`;
+	
+	`tar czvf native_ligs.tar.gz lig.*.pdb`;
+	`rm complex.*.pdb lig.*.pdb`;
 	
 	print "\n";
 	chdir "..";
@@ -92,30 +87,37 @@ foreach my $pdb (@pdbs) {
 	`sort -R tmp.nn | head -n 80 > tmp.nn2`;
 	# Combine near- and far from-native
 	`cat tmp.nearn2 tmp.nn2 > tmp.nearn.nn`;
- 	`cat tmp.header tmp.nearn.nn | awk '{print \$1,\$2,\$3,\$4,\$5,\$6,\$7}' > nonnative.out`;
- 	`cat tmp.header tmp.nearn.nn | awk '{print \$8,\$9}' > nn_rmsd.dat`;
- 	# Generate complexes from Z-dock output
- 	`./create.pl nonnative.out`;
- 	`mv complex*pdb nonnative`;
-	
+	# ZDOCK out file for non-natives
+	`awk '{print \$1,\$2,\$3,\$4,\$5,\$6,\$7}' tmp.nearn.nn > tmp.nearn.nn2`;
+ 	`cat tmp.header tmp.nearn.nn2 > nonnative.out`;
+ 	# RMSD file for non-natives
+ 	`awk '{print \$8,\$9}' tmp.nearn.nn > nn_rmsd.dat`;
+ 	# Generate complexes from ZDOCK out file
+ 	`./my-create.pl nonnative.out`;
+ 	`mv complex*pdb lig.*.pdb nonnative`;
+	# Get pairwise distance information for the complexes
 	chdir "nonnative";
 	for my $i (1..$Nstructs_nn) {
 		print "$i ";
-		`grep '^ATOM' complex.$i.pdb | head -n $last_a | grep ' CA ' > a.$i.pdb`;
-		`grep '^ATOM' complex.$i.pdb | tail -n +$first_b | grep ' CA ' > b.$i.pdb`;
-		`$exec_dir/PairDist.pl a.$i.pdb b.$i.pdb $exec_dir/aa_pairs.txt`; # > pairdist.$i.out`;
+		`$exec_dir/PairDist.pl ../rec.pdb lig.$i.pdb $exec_dir/aa_pairs.txt`; # > pairdist.$i.out`;
 		`mv r12ij.txt r12ij.$i.txt`;
 		`mv r10ij.txt r10ij.$i.txt`;
 		`mv r6ij.txt r6ij.$i.txt`;
-		`rm a.$i.pdb b.$i.pdb`;
+		#`rm lig.$i.pdb`;
 	}
+	# Combine rij information from all non-native complexes
 	`$exec_dir/CombineRij.sh $Nstructs_nn`;
 	`mv r12ij.txt ../nn_r12ij.txt`;
 	`mv r10ij.txt ../nn_r10ij.txt`;
 	`mv r6ij.txt ../nn_r6ij.txt`;
 	
-	print "\n";
-	chdir "..";
+	`tar czvf nonnative_ligs.tar.gz lig.*.pdb`;
+	`rm complex.*.pdb lig.*.pdb`;
+	
+	chdir "../";
 	`rm tmp*`;
+	
+	chdir "../";
+	print "\n\n";
 	
 }
