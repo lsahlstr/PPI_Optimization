@@ -1,0 +1,56 @@
+* Minimize Go-like model
+*
+
+resize maxnbf @snbf
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! System setup
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! topology file
+open unit 10 read form name @top
+read rtf card unit 10
+close unit 10
+
+! parameter file
+open unit 10 read form name @param
+bomlev -1
+read para card unit 10 
+close unit 10
+
+! Sequence
+open unit 10 read form name "a.pdb"
+read sequ pdb unit 10
+generate   PROA setup warn
+close unit 10
+open unit 10 read form name "b.pdb"
+read sequ pdb unit 10
+generate   PROB setup warn
+close unit 10
+
+! Coordinates
+auto angle dihe
+open unit 10 read form name "a.pdb"
+read coor pdb unit 10 resi
+close unit 10
+open unit 10 read form name "b.pdb"
+read coor pdb unit 10 resi
+close unit 10
+
+bomlev -2
+faster on
+!eten on  ! Turn on 12-10-6 potential
+update atom cdie eps 1 cutnb 999 ctofnb 999 ctonnb 999 switch vswitch
+
+energy
+inte sele segid PROA end sele segid PROB end
+
+mini sd nstep 100
+mini abnr nstep 100 tolenr 1e-5
+
+write coor pdb name "min.pdb"
+* PDB
+* 
+
+@energy
+inte sele segid PROA end sele segid PROB end
+
