@@ -40,8 +40,8 @@ readDistRMSDinfo <- function(pdb,p,potFlag) {
 	nonnative_r12 <- data.matrix(nonnative_r12[2:nrow(nonnative_r12),])
 	nonnative_r12 <- cbind(rep(0,nrow(nonnative_r12)),cbind(rep(p,nrow(nonnative_r12)),cbind(nonnativeRMSD,nonnative_r12)))
 	
-	testidx_native <- sample(1:nrow(native_r12),10)
-	testidx_nonnative <- sample(1:nrow(nonnative_r12),10)
+	testidx_native <- sample(1:nrow(native_r12),2)
+	testidx_nonnative <- sample(1:nrow(nonnative_r12),5)
 	
 	# Separate r^12 into training and testing sets
 	native_r12_test <- native_r12[testidx_native,]

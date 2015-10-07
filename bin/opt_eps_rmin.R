@@ -165,8 +165,8 @@ for (i in 1:len) {
 	# eps
 	if (i <= (len/2)) {	
 		if (opttypeFlag == "gentle") {
-			min_eps[i] <- (ipars[i] - (1.0*ipars[i])) # opt$minval
-			max_eps[i] <- (ipars[i] + (1.0*ipars[i])) # opt$maxval
+			min_eps[i] <- (ipars[i] - (0.5*ipars[i])) # opt$minval
+			max_eps[i] <- (ipars[i] + (0.5*ipars[i])) # opt$maxval
 		} else {
 			min_eps[i] <- opt$minval
 			max_eps[i] <- opt$maxval
