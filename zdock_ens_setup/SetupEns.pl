@@ -44,7 +44,7 @@ foreach my $pdb (@pdbs) {
 	`paste $zdock_out tmp.rmsds | tail -n +6 > tmp.out`;
 	
 	####################################################################
-	## Native ensemble 
+	## Native-like ensemble 
 	####################################################################
 	print "Native ensemble\n";
 	`mkdir native`;
@@ -69,7 +69,7 @@ foreach my $pdb (@pdbs) {
 		`mv r6ij.txt r6ij.$i.txt`;
 	}
 	# 6) Combine rij information from all native complexes
-	`$exec_dir/CombineRij.sh $Nstructs_n`;
+	`$exec_dir/CombineRij.sh $Nstructs_n native`;
 	`mv r12ij.txt n_r12ij.txt`;
 	`mv r10ij.txt n_r10ij.txt`;
 	`mv r6ij.txt n_r6ij.txt`;
@@ -81,6 +81,7 @@ foreach my $pdb (@pdbs) {
 	}	
 	# 8) Clean up files
 	`tar czvf ligs.tar.gz lig.*.pdb`;
+	`tar czvf init.tar.gz init.*.pdb`;
 	`tar czvf min.tar.gz min.*.pdb`;
 	`tar czvf log.tar.gz min.*.log`;
 	`rm -f complex.*.pdb lig.*.pdb min.*.pdb min.*.log`; # -f because native pose is write-protected
@@ -119,7 +120,7 @@ foreach my $pdb (@pdbs) {
 		`mv r6ij.txt r6ij.$i.txt`;
 	}
 	# 8) Combine rij information from all non-native complexes
-	`$exec_dir/CombineRij.sh $Nstructs_nn`;
+	`$exec_dir/CombineRij.sh $Nstructs_nn nonnative`;
 	`mv r12ij.txt nn_r12ij.txt`;
 	`mv r10ij.txt nn_r10ij.txt`;
 	`mv r6ij.txt nn_r6ij.txt`;
@@ -131,6 +132,7 @@ foreach my $pdb (@pdbs) {
 	}
 	# 10) Clean up files
 	`tar czvf ligs.tar.gz lig.*.pdb`;
+	`tar czvf init.tar.gz init.*.pdb`;
 	`tar czvf min.tar.gz min.*.pdb`;
 	`tar czvf log.tar.gz min.*.log`;
 	`rm complex.*.pdb lig.*.pdb min.*.pdb min.*.log`;

@@ -1,16 +1,33 @@
 #!/usr/bin/env bash
 
-# Combine rij.pl files for each complex
+# Combine rij.txt files for each complex
 # $1 = number of complexes
+# $2 = pool (native or nonnative)
+
+stop=$1
+pool=$2
 
 # First complex
-echo "1"
-mv r12ij.1.txt r12_tmp1
-mv r10ij.1.txt r10_tmp1
-mv r6ij.1.txt r6_tmp1
+if [ "$pool" == "native" ]; then
+	echo "native"
+	start=0
+	mv r12ij.0.txt r12_tmp1
+	mv r10ij.0.txt r10_tmp1
+	mv r6ij.0.txt r6_tmp1
+else	
+	echo "nonnative"
+	start=1
+	mv r12ij.1.txt r12_tmp1
+	mv r10ij.1.txt r10_tmp1
+	mv r6ij.1.txt r6_tmp1
+fi
+
+echo "$start"
 
 # All other complexes
-for ((i=2;i<=$1;i++)); do
+# Increment $start by one for evaluating the next pose
+let start=start+1
+for ((i=$start;i<=$stop;i++)); do
     
     echo $i
     

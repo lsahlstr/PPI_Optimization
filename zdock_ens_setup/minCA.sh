@@ -47,6 +47,7 @@ $CHARMMEXEC snbf=200000 top=go.top param=go.param < min_go.inp | egrep '^MINI|^I
 # Split minimized structure into two components
 grep PROA min.pdb | awk '{print}END{print "TER\nEND"}' > tmp.a.pdb
 grep PROB min.pdb | awk '{print}END{print "TER\nEND"}' > tmp.b.pdb
+mv init.pdb $pool/init.$member.pdb
 mv min.pdb $pool/min.$member.pdb
 
 # Template Calpha-only PDB files for Go model --> "real" residue naming
