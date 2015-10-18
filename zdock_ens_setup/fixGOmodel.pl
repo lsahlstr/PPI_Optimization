@@ -331,11 +331,10 @@ sub genNewPrm {
 				elsif ($param =~ /^NBFIX/){
 					if (defined $s[3] && $s[3] > 13){
 						printf STDERR "\nWarning: NBFIX distance is larger than 13 Angstroms!\n";
-						printf STDERR "Warning: This contact has been removed!\n";
+						printf STDERR "Warning: Please verify that this contact is correct!\n";
 						printf STDERR "$_\n";
-					} else {
-						printf OUT $_;
 					}
+					printf OUT $_;
 				}
         else{
           printf OUT $_;

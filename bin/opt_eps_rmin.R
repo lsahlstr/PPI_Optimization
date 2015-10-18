@@ -21,6 +21,7 @@
 suppressPackageStartupMessages(library("optparse"))
 suppressPackageStartupMessages(library("GA"))
 suppressPackageStartupMessages(library("plyr"))
+suppressPackageStartupMessages(library("doParallel"))
 
 
 #######################################################################
@@ -200,7 +201,9 @@ if (potFlag == "eten") {
 }
 
 # Run GA
-GAReal <- ga(type = "real-valued", fitness=ffunc, min=min, max=max, popSize=popSize, maxiter=iters, suggestions=initialSolution, keepBest=T) 
+cat(sprintf("%s\n\n",date()))
+GAReal <- ga(type = "real-valued", fitness=ffunc, min=min, max=max, popSize=popSize, maxiter=iters, suggestions=jitter(initialSolution), keepBest=T, parallel=TRUE) 
+cat(sprintf("%s\n\n",date()))
 
 # Save data from all GA cycles to R data structure
 save(GAReal,file="GA.RData")
@@ -269,7 +272,7 @@ old_new <- data.frame(respair=iparsRes,
 	rij_optimized=bestPars[((len/2)+1):len])
 
 # Save environment variables to R data structure
-save(list=c("ipars","bestPars","min","max","list","rmsd_ener","old_new"),file="check.RData")
+save(list=c("initialSolution","ipars","bestPars","min","max","list","rmsd_ener","old_new"),file="check.RData")
 
 # Write to output files
 write.table(old_new,file="OldNewComp.txt",row.names=F,quote=F,col.names=T)
@@ -278,5 +281,6 @@ write.table(rmsd_ener_test,file="rmsdEnerComp_test.txt",row.names=F,quote=F,col.
 write.table(zscore,file="zscore.dat",row.names=F,quote=F,col.names=F)
 write.table(slr,file="slr.dat",row.names=F,quote=F,col.names=F)
 
+save.image("image.RData")
 cat("Done!\n")
 cat(sprintf("%s\n\n",date()))

@@ -5,20 +5,21 @@ pool=$1
 member=$2
 
 # Environment variables
-EXEC_DIR=/export/nVerde/users/lsahlstr/CGPPI_FF/opt5/bin
+EXEC_DIR=/export/nVerde/users/lsahlstr/CGPPI_FF/opt6/bin
 #CHARMMEXEC=/export/nVerde/users/lsahlstr/apps/charmm/exec/em64t_M/charmm
 CHARMMEXEC=/export/nVerde/users/lsahlstr/apps/charmm_bigMAXATC/exec/em64t_M/charmm
 
-# Load modules (Just place in PBS script when running over multiple systems)
-#module load CHARMM
-#module load MMTSB
-#module load Intel
-#module load Openmpi
-
 # Make all-atom PDBs in CHARMM-friendly format
+# Receptor from bound form (for native pose)
 if ([ "$pool" == "native" ] && [ $member -eq 0 ]); then
+	convpdb.pl -nsel protein -setchain A -segnames rec.0.pdb | sed 's/PRO0/PROA/g' | sed 's/HSD/HIS/g' | grep -v END > a_AA.pdb
+	cp -p a_AA.pdb a_AA.0.pdb
+fi
+# Receptor from unbound form
+if ([ "$pool" == "native" ] && [ $member -eq 1 ]); then
 	convpdb.pl -nsel protein -setchain A -segnames rec.pdb | sed 's/PRO0/PROA/g' | sed 's/HSD/HIS/g' | grep -v END > a_AA.pdb
 fi
+# Ligand from unbound form
 convpdb.pl -nsel protein -setchain B -segnames ${pool}/lig.${member}.pdb | sed 's/PRO0/PROB/g' | sed 's/HSD/HIS/g' > b_AA.pdb
 cat a_AA.pdb b_AA.pdb > ab_AA.pdb
 

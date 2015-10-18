@@ -55,6 +55,6 @@ write coor pdb name "min.pdb"
 * PDB
 * 
 
-@energy
+energy
 inte sele segid PROA end sele segid PROB end
 

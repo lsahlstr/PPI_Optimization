@@ -58,7 +58,12 @@ fitnessZ_lj <- function(pars) {
 	tmp <- tmp_info	
 	tmp$ener <- rowSums(tmp3)
     
-    -1.0*mean(ddply(.data=tmp,.var=c("system"),.fun=Zscore)$V1)
+    tmp4 <- -1.0*mean(ddply(.data=tmp,.var=c("system"),.fun=Zscore)$V1)
+    
+    print(tmp4)
+    cat(sprintf("%s\n\n",tmp4))
+    
+    return(tmp4)
 }
 
 # SLR
