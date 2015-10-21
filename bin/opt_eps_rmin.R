@@ -208,24 +208,23 @@ cat(sprintf("%s\n\n",date()))
 # Save data from all GA cycles to R data structure
 save(GAReal,file="GA.RData")
 
+# Best solution from GA optimization
+bestPars <- as.vector(GAReal@bestSol[[iters]][1,])
+
+
 #######################################################################
-# Summarize results
+# Get the mean Z-score and SLR at each iteration
 #######################################################################
-# Get value of Z-score at each iteration
 zscore <- NULL
 slr <- NULL
 if (potFlag == "eten") {
 	for (i in 1:iters) {
 		zscore <- c(zscore,calZ_eten(as.vector(GAReal@bestSol[[i]][1,])))
-	}
-	for (i in 1:iters) {
 		slr <- c(slr,calSLR_eten(as.vector(GAReal@bestSol[[i]][1,])))
 	}
 } else {
 	for (i in 1:iters) {
 		zscore <- c(zscore,calZ_lj(as.vector(GAReal@bestSol[[i]][1,])))
-	}
-	for (i in 1:iters) {
 		slr <- c(slr,calSLR_lj(as.vector(GAReal@bestSol[[i]][1,])))
 	}
 }
@@ -233,8 +232,40 @@ if (potFlag == "eten") {
 zscore <- data.frame(iters=1:iters,score=zscore)
 slr <- data.frame(iters=1:iters,score=slr)
 
-# Best solution from GA optimization
-bestPars <- as.vector(GAReal@bestSol[[iters]][1,])
+
+#######################################################################
+# Z-score and SLR for each system after final optimization cycle
+#######################################################################
+zscore_indiv_old <- NULL
+zscore_indiv_new <- NULL
+slr_indiv_old <- NULL
+slr_indiv_new <- NULL
+
+if (potFlag == "eten") {
+
+	zscore_indiv_old <- calZ_eten_indiv(ipars)
+	zscore_indiv_new <- calZ_eten_indiv(bestPars)
+	zscore_indiv_write <- data.frame(old=zscore_indiv_old,new=zscore_indiv_new)
+	zscore_indiv_write$pdb <- pdbs
+	
+	slr_indiv_old <- calSLR_eten_indiv(ipars)
+	slr_indiv_new <- calSLR_eten_indiv(bestPars)
+	slr_indiv_write <- data.frame(old=slr_indiv_old,new=slr_indiv_new)
+	slr_indiv_write$pdb <- pdbs
+
+} else {
+
+	zscore_indiv_old <- calZ_lj_indiv(ipars)
+	zscore_indiv_new <- calZ_lj_indiv(bestPars)
+	zscore_indiv_write <- data.frame(old=zscore_indiv_old,new=zscore_indiv_new)
+	zscore_indiv_write$pdb <- pdbs
+
+	slr_indiv_old <- calSLR_lj_indiv(ipars)
+	slr_indiv_new <- calSLR_lj_indiv(bestPars)
+	slr_indiv_write <- data.frame(old=slr_indiv_old,new=slr_indiv_new)
+	slr_indiv_write$pdb <- pdbs
+	
+}
 
 
 #######################################################################
@@ -271,16 +302,31 @@ old_new <- data.frame(respair=iparsRes,
 	rij_initial=ipars[((len/2)+1):len],
 	rij_optimized=bestPars[((len/2)+1):len])
 
-# Save environment variables to R data structure
-save(list=c("initialSolution","ipars","bestPars","min","max","list","rmsd_ener","old_new"),file="check.RData")
 
-# Write to output files
+#######################################################################
+# Compute enrichment score based upon sorted energies and RMSD values
+#######################################################################
+enrich_write <- ddply(.dat=rmsd_ener,.var=c("system"),.fun=enrichment)
+
+
+#######################################################################
+# Write data to output
+#######################################################################
 write.table(old_new,file="OldNewComp.txt",row.names=F,quote=F,col.names=T)
 write.table(rmsd_ener,file="rmsdEnerComp.txt",row.names=F,quote=F,col.names=F)
 write.table(rmsd_ener_test,file="rmsdEnerComp_test.txt",row.names=F,quote=F,col.names=F)
 write.table(zscore,file="zscore.dat",row.names=F,quote=F,col.names=F)
+write.table(zscore_indiv_write,file="zscore_indiv.dat",row.names=F,quote=F,col.names=F)
 write.table(slr,file="slr.dat",row.names=F,quote=F,col.names=F)
+write.table(slr_indiv_write,file="slr_indiv.dat",row.names=F,quote=F,col.names=F)
+write.table(enrich_write,file="enrich.dat",row.names=F,quote=F,col.names=F)
 
+
+#######################################################################
+# Save R environment variables and image
+#######################################################################
+save(list=c("initialSolution","ipars","bestPars","min","max","list","rmsd_ener","old_new"),file="check.RData")
 save.image("image.RData")
+
 cat("Done!\n")
 cat(sprintf("%s\n\n",date()))

@@ -154,7 +154,7 @@ fitnessSLR_eten <- function(pars) {
 
 
 #######################################################################
-# Routines for computing the fitness function at each iteration after optimization
+# Routines for computing the mean value of the fitness function
 #######################################################################
 ## 12-6 potential ##
 calZ_lj <- function(pars){
@@ -270,6 +270,123 @@ calSLR_eten <- function(pars){
 
 
 #######################################################################
+# Routines for computing the fitness function for each individual system
+# included in the opitimization
+#######################################################################
+## 12-6 potential ##
+calZ_lj_indiv <- function(pars){
+
+  	list <- combinePARS(pars)
+	eps <- list$eps
+	eps <- matrix(eps,nrow=m,ncol=n,byrow=T)
+	rmin <- list$rmin
+	rmin <- matrix(rmin,nrow=m,ncol=n,byrow=T)
+	
+	r12min <- rmin**12
+	tmp_r12 <- r12[,c(-1,-2,-3)]
+	tmp1 <- r12min*tmp_r12
+	
+	r6min <- rmin**6
+	tmp_r6 <- r6[,c(-1,-2,-3)]
+	tmp2 <- r6min*tmp_r6
+	
+	tmp3 <- eps*(tmp1 - 2*tmp2)
+	
+	tmp <- tmp_info	
+	tmp$ener <- rowSums(tmp3)
+
+  	ddply(.data=tmp,.var=c("system"),.fun=Zscore)$V1
+  	  
+}
+
+calSLR_lj_indiv <- function(pars){
+
+  	list <- combinePARS(pars)
+	eps <- list$eps
+	eps <- matrix(eps,nrow=m,ncol=n,byrow=T)
+	rmin <- list$rmin
+	rmin <- matrix(rmin,nrow=m,ncol=n,byrow=T)
+	
+	r12min <- rmin**12
+	tmp_r12 <- r12[,c(-1,-2,-3)]
+	tmp1 <- r12min*tmp_r12
+	
+	r6min <- rmin**6
+	tmp_r6 <- r6[,c(-1,-2,-3)]
+	tmp2 <- r6min*tmp_r6
+	
+	tmp3 <- eps*(tmp1 - 2*tmp2)
+	
+	tmp <- tmp_info	
+	tmp$ener <- rowSums(tmp3)
+    tmp <- tmp[order(tmp$ener),]	
+  	
+  	ddply(.data=tmp,.var=c("system"),.fun=SLR)$V1
+  	  
+}
+
+## 12-10-6 potential ##
+calZ_eten_indiv <- function(pars){
+
+  	list <- combinePARS(pars)
+	eps <- list$eps
+	eps <- matrix(eps,nrow=m,ncol=n,byrow=T)
+	rmin <- list$rmin
+	rmin <- matrix(rmin,nrow=m,ncol=n,byrow=T)
+	
+	r12min <- rmin**12
+	tmp_r12 <- r12[,c(-1,-2,-3)]
+	tmp1 <- r12min*tmp_r12
+	
+	r10min <- rmin**10
+	tmp_r10 <- r10[,c(-1,-2,-3)]
+	tmp2 <- r10min*tmp_r10
+	
+	r6min <- rmin**6
+	tmp_r6 <- r6[,c(-1,-2,-3)]
+	tmp3 <- r6min*tmp_r6
+	
+	tmp4 <- eps*((13*tmp1) - (18*tmp2) + (4*tmp3))
+	
+	tmp <- tmp_info	
+	tmp$ener <- rowSums(tmp4)
+  	
+  	ddply(.data=tmp,.var=c("system"),.fun=Zscore)$V1
+  	  
+}
+
+calSLR_eten_indiv <- function(pars){
+
+  	list <- combinePARS(pars)
+	eps <- list$eps
+	eps <- matrix(eps,nrow=m,ncol=n,byrow=T)
+	rmin <- list$rmin
+	rmin <- matrix(rmin,nrow=m,ncol=n,byrow=T)
+	
+	r12min <- rmin**12
+	tmp_r12 <- r12[,c(-1,-2,-3)]
+	tmp1 <- r12min*tmp_r12
+	
+	r10min <- rmin**10
+	tmp_r10 <- r10[,c(-1,-2,-3)]
+	tmp2 <- r10min*tmp_r10
+	
+	r6min <- rmin**6
+	tmp_r6 <- r6[,c(-1,-2,-3)]
+	tmp3 <- r6min*tmp_r6
+	
+	tmp4 <- eps*((13*tmp1) - (18*tmp2) + (4*tmp3))
+	
+	tmp <- tmp_info	
+	tmp$ener <- rowSums(tmp4)
+	tmp <- tmp[order(tmp$ener),]
+  	
+  	ddply(.data=tmp,.var=c("system"),.fun=SLR)$V1
+  	  
+}
+
+
+#######################################################################
 # Routines to evaluate energies after optimization
 #######################################################################
 ## 12-6 potential ##
@@ -320,4 +437,22 @@ calE_eten <- function(pars,r12,r10,r6,m,n,tmp_info) {
 	
 	tmp <- data.frame(flag=tmp_info[,1],system=tmp_info[,2],rmsd=tmp_info[,3],ener=rowSums(tmp4))
 
+}
+
+
+#######################################################################
+# Routine to compute enrichment score
+#######################################################################
+enrichment <- function(tt,thresholds=seq(0.05,0.20,0.05)){
+    enrich <- NULL
+    for (threshold in thresholds) {
+		nhits <- floor(threshold*nrow(tt))
+		tt$index_energy <- rownames(tt)[order(tt$ener)]
+		tt$index_rmsd <- rownames(tt)[order(tt$rmsd)]
+		enrich <- c(enrich,sum(tt$index_energy[1:nhits] %in% tt$index_rmsd[1:nhits])/((threshold^2)*nrow(tt)))
+	}
+	enrich <- as.data.frame(t(enrich))
+	colnames(enrich) <- paste("ES_",thresholds,sep="")
+	enrich$pdb <- as.character(pdbs[unique(tt$system)])
+	return(enrich)
 }
