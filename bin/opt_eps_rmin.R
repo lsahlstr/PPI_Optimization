@@ -98,7 +98,7 @@ for (p in seq_along(pdbs)){
         ipars <- c(eps,rmin)
         
         # Get residue pair names
-        iparsRes <- eps_file$V1
+        respairs <- eps_file$V1
                 
         # Mask file
         mask_file <- read.table(opt$mask)
@@ -117,10 +117,10 @@ for (p in seq_along(pdbs)){
 		# Gentle or stringent optimization
 		opttypeFlag <- opt$opttype
         
-        list <- readDistRMSDinfo(pdb,p,potFlag)
+        list <- readDistRMSDinfo(pdb,p,potFlag,respairs)
        
     } else {
-		list <- readDistRMSDinfo(pdb,p,potFlag)    
+		list <- readDistRMSDinfo(pdb,p,potFlag,respairs)    
     }
     
     r12 <- list$r12
@@ -302,7 +302,7 @@ rmsd_ener <- rmsd_ener[order(rmsd_ener$system,rmsd_ener$ener),]
 rmsd_ener_test <- rmsd_ener_test[order(rmsd_ener_test$system,rmsd_ener_test$ener),]
 
 # Old and new parameters
-old_new <- data.frame(respair=iparsRes, 
+old_new <- data.frame(respair=respairs, 
 	eij_initial=ipars[1:(len/2)], 
 	eij_optimized=bestPars[1:(len/2)],
 	rij_initial=ipars[((len/2)+1):len],

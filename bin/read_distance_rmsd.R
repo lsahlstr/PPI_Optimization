@@ -25,121 +25,72 @@
 #######################################################################
 # Read distance and RMSD information
 #######################################################################
-readDistRMSDinfo <- function(pdb,p,potFlag) {		
+readPool <- function(pool="n") {
+	
+	superM <- matrix(ncol=214)
+		
+	poolRMSD <- read.table(paste(pdb,"/",pool,"_rmsd.dat",sep=""))$V2
 
-	# RMSD files
-	nativeRMSD <- read.table(paste(pdb,"/n_rmsd.dat",sep=""))$V2
-	nonnativeRMSD <- read.table(paste(pdb,"/nn_rmsd.dat",sep=""))$V2
-        
-	# rij^12
-	native_r12 <- t(read.table(paste(pdb,"/n_r12ij.txt",sep="")))
-	native_r12 <- data.matrix(native_r12[2:nrow(native_r12),])
-	native_r12 <- cbind(rep(1,nrow(native_r12)),cbind(rep(p,nrow(native_r12)),cbind(nativeRMSD,native_r12)))
-		   
-	nonnative_r12 <- t(read.table(paste(pdb,"/nn_r12ij.txt",sep="")))
-	nonnative_r12 <- data.matrix(nonnative_r12[2:nrow(nonnative_r12),])
-	nonnative_r12 <- cbind(rep(0,nrow(nonnative_r12)),cbind(rep(p,nrow(nonnative_r12)),cbind(nonnativeRMSD,nonnative_r12)))
-	
-	testidx_native <- sample(1:nrow(native_r12),2)
-	testidx_nonnative <- sample(1:nrow(nonnative_r12),5)
-	
-	# Separate r^12 into training and testing sets
-	native_r12_test <- native_r12[testidx_native,]
-	native_r12 <- native_r12[-testidx_native,]
-	
-	nonnative_r12_test <- nonnative_r12[testidx_nonnative,]
-	nonnative_r12 <- nonnative_r12[-testidx_nonnative,]
-	
-	if (p==1){
-		r12 <- as.matrix(rbind(native_r12,nonnative_r12))
-		r12 <- matrix(as.numeric(r12),ncol=ncol(r12),nrow=nrow(r12),byrow=F)
-		
-		r12_test <- as.matrix(rbind(native_r12_test,nonnative_r12_test))
-		r12_test <- matrix(as.numeric(r12_test),ncol=ncol(r12_test),nrow=nrow(r12_test),byrow=F)
-		
-	} else {
-		tmp <- as.matrix(rbind(native_r12,nonnative_r12))
-        tmp <- matrix(as.numeric(tmp),ncol=ncol(tmp),nrow=nrow(tmp),byrow=F)
-        r12 <- rbind(r12,tmp)
-        
-        tmp <- as.matrix(rbind(native_r12_test,nonnative_r12_test))
-        tmp <- matrix(as.numeric(tmp),ncol=ncol(tmp),nrow=nrow(tmp),byrow=F)
-        r12_test <- rbind(r12_test,tmp)
-	}
-	
-	# rij^6
-	native_r6 <- t(read.table(paste(pdb,"/n_r6ij.txt",sep="")))
-	native_r6 <- data.matrix(native_r6[2:nrow(native_r6),])
-	native_r6 <- cbind(rep(1,nrow(native_r6)),cbind(rep(p,nrow(native_r6)),cbind(nativeRMSD,native_r6)))      
-	
-	nonnative_r6 <- t(read.table(paste(pdb,"/nn_r6ij.txt",sep="")))
-	nonnative_r6 <- data.matrix(nonnative_r6[2:nrow(nonnative_r6),])
-	nonnative_r6 <- cbind(rep(0,nrow(nonnative_r6)),cbind(rep(p,nrow(nonnative_r6)),cbind(nonnativeRMSD,nonnative_r6)))
-	
-	# Separate r^6 into training and testing sets
-	native_r6_test <- native_r6[testidx_native,]
-	native_r6 <- native_r6[-testidx_native,]
-	
-	nonnative_r6_test <- nonnative_r6[testidx_nonnative,]
-	nonnative_r6 <- nonnative_r6[-testidx_nonnative,]
-	
-	if (p==1){
-		r6 <- as.matrix(rbind(native_r6,nonnative_r6))
-		r6 <- matrix(as.numeric(r6),ncol=ncol(r6),nrow=nrow(r6),byrow=F)
-		
-		r6_test <- as.matrix(rbind(native_r6_test,nonnative_r6_test))
-		r6_test <- matrix(as.numeric(r6_test),ncol=ncol(r6_test),nrow=nrow(r6_test),byrow=F)
-		
-	} else {
-		tmp <- as.matrix(rbind(native_r6,nonnative_r6))
-        tmp <- matrix(as.numeric(tmp),ncol=ncol(tmp),nrow=nrow(tmp),byrow=F)
-        r6 <- rbind(r6,tmp)
-        
-        tmp <- as.matrix(rbind(native_r6_test,nonnative_r6_test))
-        tmp <- matrix(as.numeric(tmp),ncol=ncol(tmp),nrow=nrow(tmp),byrow=F)
-        r6_test <- rbind(r6_test,tmp)
-	}
-	
-	if (potFlag == "eten") {
-		# rij^10
-		native_r10 <- t(read.table(paste(pdb,"/n_r10ij.txt",sep="")))
-		native_r10 <- data.matrix(native_r10[2:nrow(native_r10),])
-		native_r10 <- cbind(rep(1,nrow(native_r10)),cbind(rep(p,nrow(native_r10)),cbind(nativeRMSD,native_r10)))
-		   
-		nonnative_r10 <- t(read.table(paste(pdb,"/nn_r10ij.txt",sep="")))
-		nonnative_r10 <- data.matrix(nonnative_r10[2:nrow(nonnative_r10),])
-		nonnative_r10 <- cbind(rep(0,nrow(nonnative_r10)),cbind(rep(p,nrow(nonnative_r10)),cbind(nonnativeRMSD,nonnative_r10)))
-	
-		# Separate r^10 into training and testing sets
-		native_r10_test <- native_r10[testidx_native,]
-		native_r10 <- native_r10[-testidx_native,]
-	
-		nonnative_r10_test <- nonnative_r10[testidx_nonnative,]
-		nonnative_r10 <- nonnative_r10[-testidx_nonnative,]
-	
-		if (p==1){
-			r10 <- as.matrix(rbind(native_r10,nonnative_r10))
-			r10 <- matrix(as.numeric(r10),ncol=ncol(r10),nrow=nrow(r10),byrow=F)
-		
-			r10_test <- as.matrix(rbind(native_r10_test,nonnative_r10_test))
-			r10_test <- matrix(as.numeric(r10_test),ncol=ncol(r10_test),nrow=nrow(r10_test),byrow=F)
-		
-		} else {
-			tmp <- as.matrix(rbind(native_r10,nonnative_r10))
-			tmp <- matrix(as.numeric(tmp),ncol=ncol(tmp),nrow=nrow(tmp),byrow=F)
-			r10 <- rbind(r10,tmp)
-		
-			tmp <- as.matrix(rbind(native_r10_test,nonnative_r10_test))
-			tmp <- matrix(as.numeric(tmp),ncol=ncol(tmp),nrow=nrow(tmp),byrow=F)
-			r10_test <- rbind(r10_test,tmp)
+	for (nn in 1:length(poolRMSD)) {
+
+		# read in data
+		R <- read.table(paste(pdb,"/",pool,"_rij.",nn,".txt",sep=""),col.names=c("pair","rij"))
+
+		# Get system info		
+		info <- matrix(nrow=lsize,ncol=4)
+		info[,1] <- 0
+		if (pool == "n") {
+			info[,1] <- 1
 		}
+		info[,2] <- p
+		info[,3] <- poolRMSD[nn]
+		info[,4] <- nn
+
+		# order based on pair (resnames of the ij pair)
+		R <- R[order(R$pair),]
+
+		R$pair <- as.character(R$pair)
+		names <- as.character(respairs)
+
+		# Loop over ij keys and create list (and matrix)
+		# initial list l and matrix m
+		l <- list(NULL)
+		m <- matrix(nrow=length(names),ncol=lsize)
+
+		for (i in seq_along(names)) {
+			name <- names[i]
+			tmp <- c(subset(R,pair==name)$rij)
+			nzeros <- lsize-length(tmp)
+
+			if(!is.null(tmp)){
+				tmp <- as.vector(padzeros(tmp, nzeros, side="right"))
+			} else {
+				tmp <- rep(0,lsize)
+			}						
+			l[[name]] <- tmp
+			m[i,] <- tmp					
+		}
+		superM <- rbind(superM,cbind(info,t(m)))
+	}
 	
-		list <- list(r12=r12,r12_test=r12_test,r10=r10,r10_test=r10_test,r6=r6,r6_test=r6_test)
+	return(superM[-1,])
 	
-	} else {
-		list <- list(r12=r12,r12_test=r12_test,r6=r6,r6_test=r6_test)
-    }
-    
-    return(list)
+}
+
+#######################################################################
+# Read distance and RMSD information
+#######################################################################
+readDistRMSDinfo <- function(pdbs,lsize=1000) {		
+
+	superM2 <- matrix(ncol=214)
+	
+	for (p in seq_along(pdbs)){
+		pdb <- pdbs[p]
+		superM2 <- rbind(superM2,readPool("n"))
+		superM2 <- rbind(superM2,readPool("nn"))
+		
+	}
+	
+	return(superM2[-1,])
 
 }
