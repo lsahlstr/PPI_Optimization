@@ -34,6 +34,8 @@ option_list <- list(
 		help="File containing initial guesses of interaction distances, rmin_ij [default %default]"),
 	make_option(c("-m", "--mask"), type="character", default="mask_20.txt",
 		help="File containing 1's and 0's to specify which parameters to optimize and which to ignore [default %default]"),
+	make_option(c("-w", "--weights"), type="character", default="weights.txt",
+		help="File containing weights specifying the contribution of each system to the fitness function [default %default]"),
 	make_option(c("-p", "--potential"), type="character", default="lj",
 		help="String defining the potential function to use for optimization (lj or eten) [default %default]"),
 	make_option(c("-f", "--fitness"), type="character", default="zscore",
@@ -101,6 +103,10 @@ for (p in seq_along(pdbs)){
         # Mask file
         mask_file <- read.table(opt$mask)
         mask <- mask_file$V2
+        
+        # Weights
+        weights_file <- read.table(opt$weights)
+        weights <- weights_file$V2 
         
         # Potential
 		potFlag <- opt$potential

@@ -58,7 +58,7 @@ fitnessZ_lj <- function(pars) {
 	tmp <- tmp_info	
 	tmp$ener <- rowSums(tmp3)
     
-    tmp4 <- -1.0*mean(ddply(.data=tmp,.var=c("system"),.fun=Zscore)$V1)
+    tmp4 <- -1.0*weighted.mean(ddply(.data=tmp,.var=c("system"),.fun=Zscore)$V1,weights)
     
     print(tmp4)
     cat(sprintf("%s\n\n",tmp4))
@@ -89,7 +89,7 @@ fitnessSLR_lj <- function(pars) {
 	tmp$ener <- rowSums(tmp3)
     tmp <- tmp[order(tmp$ener),]
     
-    mean(ddply(.data=tmp,.var=c("system"),.fun=SLR)$V1)
+    weighted.mean(ddply(.data=tmp,.var=c("system"),.fun=SLR)$V1,weights)
 }
 
 ## 12-10-6 potential ##
@@ -119,7 +119,7 @@ fitnessZ_eten <- function(pars) {
 	tmp <- tmp_info	
 	tmp$ener <- rowSums(tmp4)
     
-    -1.0*mean(ddply(.data=tmp,.var=c("system"),.fun=Zscore)$V1)
+    -1.0*weighted.mean(ddply(.data=tmp,.var=c("system"),.fun=Zscore)$V1,weights)
 }
 
 # SLR
@@ -149,7 +149,7 @@ fitnessSLR_eten <- function(pars) {
 	tmp$ener <- rowSums(tmp4)
 	tmp <- tmp[order(tmp$ener),]
     
-    mean(ddply(.data=tmp,.var=c("system"),.fun=SLR)$V1)
+    weighted.mean(ddply(.data=tmp,.var=c("system"),.fun=SLR)$V1,weights)
 }
 
 
@@ -178,7 +178,7 @@ calZ_lj <- function(pars){
 	tmp <- tmp_info	
 	tmp$ener <- rowSums(tmp3)
   	
-  	mean(ddply(.data=tmp,.var=c("system"),.fun=Zscore)$V1)
+  	weighted.mean(ddply(.data=tmp,.var=c("system"),.fun=Zscore)$V1,weights)
   	  
 }
 
@@ -204,7 +204,7 @@ calSLR_lj <- function(pars){
 	tmp$ener <- rowSums(tmp3)
     tmp <- tmp[order(tmp$ener),]	
   	
-  	mean(ddply(.data=tmp,.var=c("system"),.fun=SLR)$V1)
+  	weighted.mean(ddply(.data=tmp,.var=c("system"),.fun=SLR)$V1,weights)
   	  
 }
 
@@ -234,7 +234,7 @@ calZ_eten <- function(pars){
 	tmp <- tmp_info	
 	tmp$ener <- rowSums(tmp4)
   	
-  	mean(ddply(.data=tmp,.var=c("system"),.fun=Zscore)$V1)
+  	weighted.mean(ddply(.data=tmp,.var=c("system"),.fun=Zscore)$V1,weights)
   	  
 }
 
@@ -264,7 +264,7 @@ calSLR_eten <- function(pars){
 	tmp$ener <- rowSums(tmp4)
 	tmp <- tmp[order(tmp$ener),]
   	
-  	mean(ddply(.data=tmp,.var=c("system"),.fun=SLR)$V1)
+  	weighted.mean(ddply(.data=tmp,.var=c("system"),.fun=SLR)$V1,weights)
   	  
 }
 

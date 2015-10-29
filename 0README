@@ -34,3 +34,9 @@ git push origin master
 git add *.R
 git commit -a -m "adding R codes for optimizing energies and distances simultaneously, and with different potential functions"
 git push
+
+///
+git checkout master
+git merge dev1
+git push
+
