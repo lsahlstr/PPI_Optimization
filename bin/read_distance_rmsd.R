@@ -25,26 +25,28 @@
 #######################################################################
 # Read distance and RMSD information
 #######################################################################
-readPool <- function(pool="n") {
+readPool <- function(pool="n",lengthm) {
 	
-	superM <- matrix(ncol=214)
+	superM <- matrix(ncol=lengthm)
 		
 	poolRMSD <- read.table(paste(pdb,"/",pool,"_rmsd.dat",sep=""))$V2
 
-	for (nn in 1:length(poolRMSD)) {
+	for (conf in 1:length(poolRMSD)) {
 
 		# read in data
-		R <- read.table(paste(pdb,"/",pool,"_rij.",nn,".txt",sep=""),col.names=c("pair","rij"))
+		R <- read.table(paste(pdb,"/",pool,"_rij.",conf,".txt",sep=""),col.names=c("pair","rij"))
 
-		# Get system info		
-		info <- matrix(nrow=lsize,ncol=4)
-		info[,1] <- 0
-		if (pool == "n") {
-			info[,1] <- 1
-		}
-		info[,2] <- p
-		info[,3] <- poolRMSD[nn]
-		info[,4] <- nn
+		# Get system info
+		#if (conf == 1) {		
+			info <- NULL
+			info[1] <- 0
+			if (pool == "n") {
+				info[1] <- 1
+			}
+			info[2] <- p
+			info[3] <- poolRMSD[conf]
+			info[4] <- conf
+		#}
 
 		# order based on pair (resnames of the ij pair)
 		R <- R[order(R$pair),]
@@ -70,9 +72,10 @@ readPool <- function(pool="n") {
 			l[[name]] <- tmp
 			m[i,] <- tmp					
 		}
-		superM <- rbind(superM,cbind(info,t(m)))
+		m <- c(info,as.vector(t(m)))
+		superM <- rbind(superM,m)
 	}
-	
+		
 	return(superM[-1,])
 	
 }
@@ -82,12 +85,13 @@ readPool <- function(pool="n") {
 #######################################################################
 readDistRMSDinfo <- function(pdbs,lsize=1000) {		
 
-	superM2 <- matrix(ncol=214)
+	lengthm <- 4 + (210 * lsize)
+	superM2 <- matrix(ncol=lengthm)
 	
 	for (p in seq_along(pdbs)){
 		pdb <- pdbs[p]
-		superM2 <- rbind(superM2,readPool("n"))
-		superM2 <- rbind(superM2,readPool("nn"))
+		superM2 <- rbind(superM2,readPool("n",lengthm))
+		superM2 <- rbind(superM2,readPool("nn",lengthm))
 		
 	}
 	

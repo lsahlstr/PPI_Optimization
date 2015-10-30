@@ -22,6 +22,7 @@ suppressPackageStartupMessages(library("optparse"))
 suppressPackageStartupMessages(library("GA"))
 suppressPackageStartupMessages(library("plyr"))
 suppressPackageStartupMessages(library("doParallel"))
+suppressPackageStartupMessages(library("ptw"))
 
 
 #######################################################################
