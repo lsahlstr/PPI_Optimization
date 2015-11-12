@@ -9,7 +9,7 @@ my $last_a = undef;
 my $first_b = undef;
 my $nf = undef;
 my $zdock_dir = "/export/nVerde/users/lsahlstr/CGPPI_FF/decoys_bm4_zd3.0.2_6deg";
-my $exec_dir = "/export/nVerde/users/lsahlstr/CGPPI_FF/opt5/bin";
+my $exec_dir = "/export/nVerde/users/lsahlstr/CGPPI_FF/recast/bin";
 
 # List of systems (PDB ID's) for which to construct native and non-native pools
 my $pdblist = $ARGV[0];
@@ -26,11 +26,15 @@ foreach my $pdb (@pdbs) {
     chdir $pdb;
 
 	# Get the Zdock files for the current system
+	my $lig_pdb_bound = "${pdb}_l_b.pdb";
+	my $rec_pdb_bound = "${pdb}_r_b.pdb";
 	my $lig_pdb = "${pdb}_l_u.pdb.ms";
 	my $rec_pdb = "${pdb}_r_u.pdb.ms";
 	my $zdock_out = "${pdb}.zd3.0.2.fg.out";
 	my $zdock_rmsds = "${pdb}.zd3.0.2.fg.out.rmsds";
 	`cp -p $zdock_dir/create* .`;
+	`cp -p $zdock_dir/input_pdbs/$lig_pdb_bound .`;
+	`cp -p $zdock_dir/input_pdbs/$rec_pdb_bound .`;
 	`cp -p $zdock_dir/input_pdbs/$lig_pdb .`;
 	`cp -p $zdock_dir/input_pdbs/$rec_pdb .`;
 	`cp -p $zdock_dir/results/$zdock_out .`;
@@ -56,23 +60,17 @@ foreach my $pdb (@pdbs) {
 	# 3) RMSD file for natives
 	`awk 'BEGIN{print "0 0"}{print \$8,\$9}' tmp.native > n_rmsd.dat`;  # first line = "0 0" for native pose
 	# 4) Generate complexes from ZDOCK out file
+	`cp -p $lig_pdb_bound native/lig.0.pdb`;  # ligand in the native complex
+	`cp -p $rec_pdb_bound rec.0.pdb`;  # receptor in the native complex	
 	`./my-create.pl native.out`;
 	`mv complex*pdb lig.*.pdb native`;
-	`cp -p $lig_pdb native/lig.0.pdb`;  # ligand in the native complex
 	# 5) Minimize complexes and get pairwise distance information for the complexes
 	for my $i (0..$Nstructs_n) {
 		print "$i ";
 		# Call external program that builds a Go model of the complex and performs the minimization 
 		`$exec_dir/minCA.sh native $i`;		
-		`mv r12ij.txt r12ij.$i.txt`;
-		`mv r10ij.txt r10ij.$i.txt`;
-		`mv r6ij.txt r6ij.$i.txt`;
+		`mv rij.txt n_rij.$i.txt`;
 	}
-	# 6) Combine rij information from all native complexes
-	`$exec_dir/CombineRij.sh $Nstructs_n native`;
-	`mv r12ij.txt n_r12ij.txt`;
-	`mv r10ij.txt n_r10ij.txt`;
-	`mv r6ij.txt n_r6ij.txt`;
 	# 7) Check to see if all non-native structures are present
 	chdir "native";
 	$nf = `ls -1 min.*.log | wc -l`;
@@ -84,7 +82,7 @@ foreach my $pdb (@pdbs) {
 	`tar czvf init.tar.gz init.*.pdb`;
 	`tar czvf min.tar.gz min.*.pdb`;
 	`tar czvf log.tar.gz min.*.log`;
-	`rm -f complex.*.pdb lig.*.pdb min.*.pdb min.*.log`; # -f because native pose is write-protected
+	`rm -f complex.*.pdb lig.*.pdb init.*.pdb min.*.pdb min.*.log`; # -f because native pose is write-protected
 	
 	chdir "..";
 	print "\n";
@@ -115,27 +113,20 @@ foreach my $pdb (@pdbs) {
 		print "$i ";
 		# Call external program that builds a Go model of the complex and performs the minimization
 		`$exec_dir/minCA.sh nonnative $i`;
-		`mv r12ij.txt r12ij.$i.txt`;
-		`mv r10ij.txt r10ij.$i.txt`;
-		`mv r6ij.txt r6ij.$i.txt`;
+		`mv rij.txt nn_rij.$i.txt`;
 	}
-	# 8) Combine rij information from all non-native complexes
-	`$exec_dir/CombineRij.sh $Nstructs_nn nonnative`;
-	`mv r12ij.txt nn_r12ij.txt`;
-	`mv r10ij.txt nn_r10ij.txt`;
-	`mv r6ij.txt nn_r6ij.txt`;
-	# 9) Check to see if all non-native structures are present
+	# 8) Check to see if all non-native structures are present
 	chdir "nonnative";
 	$nf = `ls -1 min.*.log | wc -l`;
 	if ($nf == $Nstructs_nn) {
 	    `echo "nn" >> ../check`;
 	}
-	# 10) Clean up files
+	# 9) Clean up files
 	`tar czvf ligs.tar.gz lig.*.pdb`;
 	`tar czvf init.tar.gz init.*.pdb`;
 	`tar czvf min.tar.gz min.*.pdb`;
 	`tar czvf log.tar.gz min.*.log`;
-	`rm complex.*.pdb lig.*.pdb min.*.pdb min.*.log`;
+	`rm complex.*.pdb lig.*.pdb init.*.pdb min.*.pdb min.*.log`;
 	chdir "../";
 	
 	`rm tmp*`;

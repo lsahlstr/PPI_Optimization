@@ -6,12 +6,10 @@ use warnings;
 my $a_mol = $ARGV[0];       # PDB file for mol A
 my $b_mol = $ARGV[1];       # PDB file for mol B
 my $aa_pairs = $ARGV[2]; 	# File containing all 210 possible amino acid pairs
+my $cutoff = 20;            # Cutoff within which to store i,j interactions
 my %a_chains = ();          # hash for molecule A info
 my %b_chains = ();          # hash for molecule B info
-my %r12 = ();             	# hash for storing sum of 1/r^12 values for given inter-protein residue pair
-my %r10 = ();             	# hash for storing sum of 1/r^10 values for given inter-protein residue pair
-my %r6 = ();			  	# hash for storing sum of 1/r^6 values for given inter-protein residue pair
-#my $outdir = "out_spy_pep";   # Directory for writing individual maps 
+my %r = ();             	# hash for storing rij values for given inter-protein residue pair
 #`mkdir -p $outdir`;           
 
 
@@ -113,102 +111,66 @@ foreach my $key (sort keys %b_chains) {
 #############################################################################
 # Get inter-molecular Ca-Ca distances
 #############################################################################
+open(OUT,">rij.txt");
 for (my $i=0; $i<=$#c_a; $i++) {  # for each mol_a chain
     for (my $j=0; $j<=$#c_b; $j++){  # for each mol_b chain
 
-	my $outname = $c_a[$i].".".$c_b[$j].".pairdist";
-    open(OUT,"$outname");
-
-	foreach my $ai (@{$a_chains{$c_a[$i]}}) {
-	    foreach my $aj (@{$b_chains{$c_b[$j]}}) {
-	    
-	    	# atom i
-			my $resname_i = $ai->{resname};
-			my $resnum_i = $ai->{resnum};
-			my $xcoor_i = $ai->{xcoor};
-			my $ycoor_i = $ai->{ycoor};
-			my $zcoor_i = $ai->{zcoor};
+		foreach my $ai (@{$a_chains{$c_a[$i]}}) {
+			foreach my $aj (@{$b_chains{$c_b[$j]}}) {
+		
+				# atom i
+				my $resname_i = $ai->{resname};
+				my $resnum_i = $ai->{resnum};
+				my $xcoor_i = $ai->{xcoor};
+				my $ycoor_i = $ai->{ycoor};
+				my $zcoor_i = $ai->{zcoor};
 	
-			# atom j
-			my $resname_j = $aj->{resname};
-			my $resnum_j = $aj->{resnum};
-			my $xcoor_j = $aj->{xcoor};
-            my $ycoor_j = $aj->{ycoor};
-            my $zcoor_j = $aj->{zcoor};
+				# atom j
+				my $resname_j = $aj->{resname};
+				my $resnum_j = $aj->{resnum};
+				my $xcoor_j = $aj->{xcoor};
+				my $ycoor_j = $aj->{ycoor};
+				my $zcoor_j = $aj->{zcoor};
 			
-			# Identity of residue pair
-            my $res_pair;
-            if ($resname_i lt $resname_j) {
-                $res_pair = $resname_i.$resname_j;
-            } else {
-                $res_pair = $resname_j.$resname_i;
-            }
-		    
-		    # Distance information for intermolecular potential
-            my $r_ij = abs(sqrt((($xcoor_j-$xcoor_i)**2) 
-		    	+ (($ycoor_j-$ycoor_i)**2)
-		    	+ (($zcoor_j-$zcoor_i)**2)));
-		    
-		    (my $s1="$c_a[$i]:$resname_i$resnum_i")=~s/ //g;
-		    (my $s2="$c_b[$j]:$resname_j$resnum_j")=~s/ //g;
-		    #print "$s1 $s2 $r_ij\n";
-		    
-			my $r112_ij = $r_ij**12;            
-            my $r12_ij = (1/$r_ij)**12;
-            my $r10_ij = (1/$r_ij)**10;
-            my $r6_ij = (1/$r_ij)**6;
-		    
-		    $r12{$res_pair} += $r12_ij;
-            $r10{$res_pair} += $r10_ij;
-            $r6{$res_pair} += $r6_ij;
-
-            }
-        }
-    close OUT;
+				# Identity of residue pair
+				my $res_pair;
+				if ($resname_i lt $resname_j) {
+					$res_pair = $resname_i.$resname_j;
+				} else {
+					$res_pair = $resname_j.$resname_i;
+				}
+			
+				# Distance information for intermolecular potential
+				my $r_ij = abs(sqrt((($xcoor_j-$xcoor_i)**2) 
+					+ (($ycoor_j-$ycoor_i)**2)
+					+ (($zcoor_j-$zcoor_i)**2)));
+				
+				if ($r_ij <= $cutoff) {
+					printf OUT "%s\t%8.3f\n", $res_pair,$r_ij;
+				}
+			}
+		}
     }
 }
 
 # Fill in the gaps in %r12, %r10, %r6:
 # Not all 210 possible inter-chain amino acid pairs may be represented
 # in the A-B interactions, so just put a zero for them
-open (RMIN,"$aa_pairs");
-while (my $l = <RMIN>) {
-    my @l = split(' ',$l);
-    my $key = $l[0];
-    
-    if (!exists $r12{$key}) {
-        $r12{$key} = 0;
-    }
-    
-    if (!exists $r10{$key}) {
-        $r10{$key} = 0;
-    }
-    
-    if (!exists $r6{$key}) {
-        $r6{$key} = 0;
-    }
-    
-}
-close RMIN;
-
-# Sort hash keys in alphabetical order
-open(OUT,">r12ij.txt");
-foreach my $key (sort keys %r12) {
-    my $val = $r12{$key};
-    print OUT "$key $val\n";
-}
-close OUT;
-
-open(OUT,">r10ij.txt");
-foreach my $key (sort keys %r10) {
-    my $val = $r10{$key};
-    print OUT "$key $val\n";
-}
-close OUT;
-
-open(OUT,">r6ij.txt");
-foreach my $key (sort keys %r6) {
-    my $val = $r6{$key};
-    print OUT "$key $val\n";
-} 
-close OUT;
+# open (RMIN,"$aa_pairs");
+# while (my $l = <RMIN>) {
+#     my @l = split(' ',$l);
+#     my $key = $l[0];
+#     
+#     if (!exists $r{$key}) {
+#         $r{$key} = 0;
+#     }
+# }
+# close RMIN;
+# 
+# # Sort hash keys in alphabetical order
+# open(OUT,">rij.txt");
+# foreach my $key (sort keys %r) {
+#     my $val = $r{$key};
+#     print OUT "$key $val\n";
+# }
+# close OUT;

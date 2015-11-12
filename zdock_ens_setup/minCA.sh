@@ -5,7 +5,7 @@ pool=$1
 member=$2
 
 # Environment variables
-EXEC_DIR=/export/nVerde/users/lsahlstr/CGPPI_FF/opt6/bin
+EXEC_DIR=/export/nVerde/users/lsahlstr/CGPPI_FF/recast/bin
 #CHARMMEXEC=/export/nVerde/users/lsahlstr/apps/charmm/exec/em64t_M/charmm
 CHARMMEXEC=/export/nVerde/users/lsahlstr/apps/charmm_bigMAXATC/exec/em64t_M/charmm
 
