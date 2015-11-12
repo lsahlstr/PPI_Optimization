@@ -1,0 +1,43 @@
+#!/bin/bash
+#PBS -N zdock_SYSTEM
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=6:00:00
+#PBS -q brooks
+#PBS -j oe
+
+# Go to remote directory
+echo $PBS_O_WORKDIR
+cd $PBSTMPDIR
+touch $PBSREMOTEDIR/.keep
+cat $PBS_NODEFILE | sort -u | awk ' { print $1, " 1 ",dir } '  dir=$PBSTMPDIR > hostlist
+
+# Load modules
+module load CHARMM
+module load MMTSB
+module load Intel
+module load Openmpi
+
+# Copy over necessary input files from work directory
+WORK=$PBS_O_WORKDIR
+cp -p $WORK/SetupEns.pl .
+cp -pr $WORK/bin .
+
+# Specify which system
+system=SYSTEM
+echo $system > pdblist
+
+# Construct native and non-native pools
+./SetupEns.pl pdblist > $system.log
+
+# Copy data back to work directory
+if [ -e ${system}/check ]; then
+    n=$(wc -l "${system}/check" | awk '{print $1}')
+    if [ $n -eq 2 ]; then
+        cp -pr $system $PBS_O_WORKDIR
+        cp -p hostlist pdblist $system.log $PBS_O_WORKDIR/$system
+    else
+        mkdir -p $PBS_O_WORKDIR/failed
+        touch ${system}_failed
+        cp -p ${system}_failed $PBS_O_WORKDIR/failed
+    fi
+fi

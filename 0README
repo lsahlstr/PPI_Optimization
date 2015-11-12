@@ -1,41 +1,11 @@
-Repository for developing code for optimization of protein-protein interactions.
+Repository for developing scipts for optimization of protein-protein interactions.
 
-# Setup repo:
-In directory above,
-git clone git@github.com:lsahlstr/PPI_Optimization.git
-
-cd PPI_Optimization/
-echo "Repository for developing code for optimization of protein-protein interactions." >> 0README
-git add 0README
-git commit -am "setup"
-git push -u origin master
-
-# From Git Repository after setup
-…or create a new repository on the command line
-
-
-echo "# PPI_Optimization" >> README.md
-git init
-git add README.md
-git commit -m "first commit"
-git remote add origin git@github.com:lsahlstr/PPI_Optimization.git
-git push -u origin master
-…or push an existing repository from the command line
-
-
-git remote add origin git@github.com:lsahlstr/PPI_Optimization.git
-git push -u origin master
-
-git status
-git commit -a
-git push origin master
-
-///
+// Example commit
 git add *.R
-git commit -a -m "adding R codes for optimizing energies and distances simultaneously, and with different potential functions"
+git commit -a -m "adding R scripts for optimizing energies and distances simultaneously, and with different potential functions"
 git push
 
-///
+// Example to merge master with other branch
 git checkout master
 git merge dev1
 git push
