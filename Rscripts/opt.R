@@ -63,77 +63,55 @@ cat("Purpose: To determine a set of parameters (eps_ij and rmin_ij) that yield n
 cat("Authors: Logan S. Ahlstrom and Aaron T. Frank\n")
 cat(sprintf("%s\n\n",date()))
 
+#######################################################################
+# Load R image file with distance and RMSD information; rij_data
+#######################################################################
+load('dist_data.RData')
 
 #######################################################################
 # Source external routines
 #######################################################################
 # Combine energy and distance parameters
-source('combine_pars.R')
+source('~/repos/PPI_Optimization/Rscripts/combine_pars.R')
 # Fitness and energy functions
-source('fitness_energy.R')
-# Read disance and RMSD information
-source('read_distance_rmsd.R')
-
+source('~/repos/PPI_Optimization/Rscripts/fitness_energy.R')
 
 #######################################################################
-# Read data for each system
+# Read data
 #######################################################################
-pdbs <- read.table(opt$list)$V1
-for (p in seq_along(pdbs)){
-    pdb <- pdbs[p]
-    
-    cat(sprintf("%s\n",pdbs[p]))
-    
-    if (p==1){
         
-        # Initial eps values
-        eps_file <- read.table(opt$eps)
-		eps <- eps_file$V2
+# Initial eps values
+eps_file <- read.table(opt$eps)
+eps <- eps_file$V2
+
+# Initial rmin values
+rmin_file <- read.table(opt$rmin)
+rmin <- rmin_file$V2
+rminSD <- rmin_file$V3
+	  
+# Combine eps and rmin into a single data structure
+ipars <- c(eps,rmin)
+
+# Get residue pair names
+respairs <- eps_file$V1
 		
-		# Initial rmin values
-        rmin_file <- read.table(opt$rmin)
-        rmin <- rmin_file$V2
-        rminSD <- rmin_file$V3
-              
-        # Combine eps and rmin into a single data structure
-        ipars <- c(eps,rmin)
-        
-        # Get residue pair names
-        respairs <- eps_file$V1
-                
-        # Mask file
-        mask_file <- read.table(opt$mask)
-        mask <- mask_file$V2
-        
-        # Weights
-        weights_file <- read.table(opt$weights)
-        weights <- weights_file$V2 
-        
-        # Potential
-		potFlag <- opt$potential
-		
-		# Fitness function
-		fitFlag <- opt$fitness
-		
-		# Gentle or stringent optimization
-		opttypeFlag <- opt$opttype
-        
-        list <- readDistRMSDinfo(pdb,p,potFlag,respairs)
-       
-    } else {
-		list <- readDistRMSDinfo(pdb,p,potFlag,respairs)    
-    }
-    
-    r12 <- list$r12
-    r12_test <- list$r12_test
-    r6 <- list$r6
-    r6_test <- list$r6_test
-    
-    if (potFlag == "eten") {
-		r10 <- list$r10
-		r10_test <- list$r10_test
-    }    
-}
+# Mask file
+mask_file <- read.table(opt$mask)
+mask <- mask_file$V2
+
+# Weights
+weights_file <- read.table(opt$weights)
+weights <- weights_file$V2 
+
+# Potential
+potFlag <- opt$potential
+
+# Fitness function
+fitFlag <- opt$fitness
+
+# Gentle or stringent optimization
+opttypeFlag <- opt$opttype
+
 
 # Get flag, system, and rmsd info
 # Training set: first three columns of r12
