@@ -56,5 +56,8 @@ pdbs <- read.table(opt$list)$V1
 respairs <- read.table(opt$pairs)$V1
 rij_rmsd_data <- combineRijRMSD(pdbs,1000)
 
-image_name <- paste(opt$outname,".RData",sep="")
-save.image(image_name)
+datafile_name <- paste(opt$outname,".RData",sep="")
+save(list=c("rij_rmsd_data"),file=datafile_name)
+
+#image_name <- paste(opt$outname,".RData",sep="")
+#save.image(image_name)

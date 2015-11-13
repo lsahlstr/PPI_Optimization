@@ -52,7 +52,9 @@ option_list <- list(
     make_option(c("-l", "--list"), type="character", default="pdblist",
 		help="One-column file listing the sub-directories for each system to be included in the optimization [default %default]"),
 	make_option(c("-t", "--opttype"), type="character", default="gentle",
-		help="Flag for optimization type: gentle (refinement) or stringent [default %default]")
+		help="Flag for optimization type: gentle (refinement) or stringent [default %default]"),
+	make_option(c("-i", "--imagefile"), type="character", default="rij.RData",
+		help="R image file containing data structure with rij and RMSD information [default %default]")
 )
 parser <- OptionParser(usage = "%prog [options] epsilonFile rminFile maskFile potentialType", option_list=option_list)
 arguments <- parse_args(parser, positional_arguments = TRUE)
@@ -64,22 +66,24 @@ cat("Authors: Logan S. Ahlstrom and Aaron T. Frank\n")
 cat(sprintf("%s\n\n",date()))
 
 #######################################################################
-# Load R image file with distance and RMSD information; rij_data
+# Load R image file with distance and RMSD information; rij_data; rij_rmsd_data
 #######################################################################
-load('dist_data.RData')
+load(opt$imagefile)
+dim(rij_rmsd_data)
 
 #######################################################################
 # Source external routines
 #######################################################################
 # Combine energy and distance parameters
 source('~/repos/PPI_Optimization/Rscripts/combine_pars.R')
-# Fitness and energy functions
-source('~/repos/PPI_Optimization/Rscripts/fitness_energy.R')
+# Fitness functions
+source('~/repos/PPI_Optimization/Rscripts/fitness.R')
+# Enrichment score
+source('~/repos/PPI_Optimization/Rscripts/enrich.R')
 
 #######################################################################
 # Read data
-#######################################################################
-        
+#######################################################################    
 # Initial eps values
 eps_file <- read.table(opt$eps)
 eps <- eps_file$V2
@@ -88,7 +92,7 @@ eps <- eps_file$V2
 rmin_file <- read.table(opt$rmin)
 rmin <- rmin_file$V2
 rminSD <- rmin_file$V3
-	  
+  
 # Combine eps and rmin into a single data structure
 ipars <- c(eps,rmin)
 
@@ -111,6 +115,11 @@ fitFlag <- opt$fitness
 
 # Gentle or stringent optimization
 opttypeFlag <- opt$opttype
+
+
+cat("Made it here\n")
+cat(sprintf("%s\n\n",date()))
+stop()
 
 
 # Get flag, system, and rmsd info
