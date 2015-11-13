@@ -69,7 +69,6 @@ cat(sprintf("%s\n\n",date()))
 # Load R image file with distance and RMSD information; rij_data; rij_rmsd_data
 #######################################################################
 load(opt$imagefile)
-dim(rij_rmsd_data)
 
 #######################################################################
 # Source external routines
@@ -80,6 +79,9 @@ source('~/repos/PPI_Optimization/Rscripts/combine_pars.R')
 source('~/repos/PPI_Optimization/Rscripts/fitness.R')
 # Enrichment score
 source('~/repos/PPI_Optimization/Rscripts/enrich.R')
+# Energy routine
+source('~/repos/PPI_Optimization/Rscripts/ener.R')
+
 
 #######################################################################
 # Read data
@@ -117,29 +119,34 @@ fitFlag <- opt$fitness
 opttypeFlag <- opt$opttype
 
 
+# Energy test
+ener_lj(ipars)
+
 cat("Made it here\n")
 cat(sprintf("%s\n\n",date()))
 stop()
 
 
+
+
+
 # Get flag, system, and rmsd info
 # Training set: first three columns of r12
-tmp_info <- data.frame(flag=r12[,1],system=r12[,2],rmsd=r12[,3])
+# tmp_info <- data.frame(flag=r12[,1],system=r12[,2],rmsd=r12[,3])
 
 # Testing set: first three columns of r12_test
-tmp_info_test <- data.frame(flag=r12_test[,1],system=r12_test[,2],rmsd=r12_test[,3])
-
+# tmp_info_test <- data.frame(flag=r12_test[,1],system=r12_test[,2],rmsd=r12_test[,3])
 
 # Get size (m x n) for defining eps and rmin matrices in energy and fitness function subroutines
 # For training set
-tmp_r12 <- r12[,c(-1,-2,-3)]
-m <- nrow(tmp_r12)
-n <- ncol(tmp_r12)
+# tmp_r12 <- r12[,c(-1,-2,-3)]
+# m <- nrow(tmp_r12)
+# n <- ncol(tmp_r12)
 
 # For testing set
-tmp_r12_test <- r12_test[,c(-1,-2,-3)]
-m_test <- nrow(tmp_r12_test)
-n_test <- ncol(tmp_r12_test)
+# tmp_r12_test <- r12_test[,c(-1,-2,-3)]
+# m_test <- nrow(tmp_r12_test)
+# n_test <- ncol(tmp_r12_test)
 
 
 #######################################################################
