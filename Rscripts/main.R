@@ -69,6 +69,11 @@ cat(sprintf("%s\n\n",date()))
 # Load R image file with distance and RMSD information; rij_data; rij_rmsd_data
 #######################################################################
 load(opt$imagefile)
+d1 <- nrow(rij_rmsd_data)
+d2 <- ncol(rij_rmsd_data)
+
+d1
+d2
 
 #######################################################################
 # Source external routines
@@ -121,7 +126,7 @@ opttypeFlag <- opt$opttype
 
 # Energy test
 check <- ener_lj(ipars)
-check
+#check
 
 save(list=c("check"),file="check_dims.RData")
 
