@@ -3,16 +3,32 @@
 #######################################################################
 ## 12-6 potential ##
 ener_lj <- function(pars){
-
-	dim(rij_rmsd_data)
+	
+	lsize <- 2
+	#lenrow <- 210*lsize
+	
   	list <- combinePARS(pars)
-  	
-	#eps <- list$eps
+  	  	
+	eps <- list$eps
+	rmin <- list$rmin
+	
+	big_eps <- matrix(nrow=210,ncol=lsize)
+	big_rmin <- matrix(nrow=210,ncol=lsize)
+	for (i in 1:210) {
+		tmp_eps <- rep(eps[i],lsize)
+		tmp_rmin <- rep(rmin[i],lsize)
+		big_eps[i,] <- tmp_eps
+		big_rmin[i,] <- tmp_rmin
+	}	
+	big_eps <- as.vector(t(big_eps))
+	big_rmin <- as.vector(t(big_rmin))
+	
+	list <- list(big_eps=big_eps,big_rmin=big_rmin)
+	
+	return(list)
+	
 	#eps <- matrix(eps,nrow=m,ncol=n,byrow=T)
-	#rmin <- list$rmin
 	#rmin <- matrix(rmin,nrow=m,ncol=n,byrow=T)
-	
-	
 	
 	#r12min <- rmin**12
 	#tmp_r12 <- r12[,c(-1,-2,-3)]

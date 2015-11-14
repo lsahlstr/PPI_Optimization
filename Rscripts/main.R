@@ -120,7 +120,11 @@ opttypeFlag <- opt$opttype
 
 
 # Energy test
-ener_lj(ipars)
+check <- ener_lj(ipars)
+check
+
+save(list=c("check"),file="check_dims.RData")
+
 
 cat("Made it here\n")
 cat(sprintf("%s\n\n",date()))
