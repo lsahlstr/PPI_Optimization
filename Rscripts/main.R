@@ -69,11 +69,13 @@ cat(sprintf("%s\n\n",date()))
 # Load R image file with distance and RMSD information; rij_data; rij_rmsd_data
 #######################################################################
 load(opt$imagefile)
-d1 <- nrow(rij_rmsd_data)
-d2 <- ncol(rij_rmsd_data)
 
-d1
-d2
+# number of instances of each i,j interaction in rij_rmsd_data 
+lsize <- 1000
+
+# Training set: get flag, system, rmsd, and conformer info
+sysinfo <- data.frame(flag=rij_rmsd_data[,1],system=rij_rmsd_data[,2],rmsd=rij_rmsd_data[,3],conf=rij_rmsd_data[,4])
+
 
 #######################################################################
 # Source external routines
@@ -126,9 +128,9 @@ opttypeFlag <- opt$opttype
 
 # Energy test
 check <- ener_lj(ipars)
-#check
 
 save(list=c("check"),file="check_dims.RData")
+save.image("check.RData")
 
 
 cat("Made it here\n")
