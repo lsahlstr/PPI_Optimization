@@ -40,10 +40,13 @@ ener_lj <- function(pars){
 	rmin_12 <- big_rmin_mat**12
 	rij_12 <- rij**12
 	tmp1 <- rmin_12/rij_12
+	#tmp1[is.na(tmp1)] <- 0
+	tmp1[is.infinite(tmp1)] <- 0
 	
 	rmin_6 <- big_rmin_mat**6
 	rij_6 <- rij**6
 	tmp2 <- rmin_6/rij_6
+	tmp2[is.infinite(tmp2)] <- 0
 	
 	tmp3 <- big_eps_mat*(tmp1 - 2*tmp2)
 	
