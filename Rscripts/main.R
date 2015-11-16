@@ -73,9 +73,11 @@ load(opt$imagefile)
 # number of instances of each i,j interaction in rij_rmsd_data 
 lsize <- 1000
 
-# Training set: get flag, system, rmsd, and conformer info
+# Training set:
+# Get system info: flag, system, rmsd, and conformer
 sysinfo <- data.frame(flag=rij_rmsd_data[,1],system=rij_rmsd_data[,2],rmsd=rij_rmsd_data[,3],conf=rij_rmsd_data[,4])
-
+# Just the distance information (rij)
+rij <- rij_rmsd_data[,c(-1,-2,-3,-4)]
 
 #######################################################################
 # Source external routines
@@ -88,6 +90,8 @@ source('~/repos/PPI_Optimization/Rscripts/fitness.R')
 source('~/repos/PPI_Optimization/Rscripts/enrich.R')
 # Energy routine
 source('~/repos/PPI_Optimization/Rscripts/ener.R')
+# eps and Rmin data structures
+source('~/repos/PPI_Optimization/Rscripts/big_pars.R')
 
 
 #######################################################################
@@ -132,32 +136,9 @@ check <- ener_lj(ipars)
 save(list=c("check"),file="check_dims.RData")
 save.image("check.RData")
 
-
 cat("Made it here\n")
 cat(sprintf("%s\n\n",date()))
 stop()
-
-
-
-
-
-# Get flag, system, and rmsd info
-# Training set: first three columns of r12
-# tmp_info <- data.frame(flag=r12[,1],system=r12[,2],rmsd=r12[,3])
-
-# Testing set: first three columns of r12_test
-# tmp_info_test <- data.frame(flag=r12_test[,1],system=r12_test[,2],rmsd=r12_test[,3])
-
-# Get size (m x n) for defining eps and rmin matrices in energy and fitness function subroutines
-# For training set
-# tmp_r12 <- r12[,c(-1,-2,-3)]
-# m <- nrow(tmp_r12)
-# n <- ncol(tmp_r12)
-
-# For testing set
-# tmp_r12_test <- r12_test[,c(-1,-2,-3)]
-# m_test <- nrow(tmp_r12_test)
-# n_test <- ncol(tmp_r12_test)
 
 
 #######################################################################
