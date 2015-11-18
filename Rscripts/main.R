@@ -53,8 +53,8 @@ option_list <- list(
 		help="One-column file listing the sub-directories for each system to be included in the optimization [default %default]"),
 	make_option(c("-t", "--opttype"), type="character", default="gentle",
 		help="Flag for optimization type: gentle (refinement) or stringent [default %default]"),
-	make_option(c("-i", "--imagefile"), type="character", default="rij.RData",
-		help="R image file containing data structure with rij and RMSD information [default %default]")
+	make_option(c("-d", "--rdatafile"), type="character", default="rij.RData",
+		help="R data file containing data structure with rij and RMSD information [default %default]")
 )
 parser <- OptionParser(usage = "%prog [options] epsilonFile rminFile maskFile potentialType", option_list=option_list)
 arguments <- parse_args(parser, positional_arguments = TRUE)
@@ -68,7 +68,7 @@ cat(sprintf("%s\n\n",date()))
 #######################################################################
 # Load R image file with distance and RMSD information; rij_data; rij_rmsd_data
 #######################################################################
-load(opt$imagefile)
+load(opt$rdatafile)
 
 # number of instances of each i,j interaction in rij_rmsd_data 
 lsize <- 1000
@@ -90,8 +90,10 @@ source('~/repos/PPI_Optimization/Rscripts/fitness.R')
 source('~/repos/PPI_Optimization/Rscripts/enrich.R')
 # Energy routine
 source('~/repos/PPI_Optimization/Rscripts/ener.R')
-# eps and Rmin data structures
+# Epsilon and Rmin data structures
 source('~/repos/PPI_Optimization/Rscripts/big_pars.R')
+# Energy check
+source('~/repos/PPI_Optimization/Rscripts/ener_check.R')
 
 
 #######################################################################
@@ -129,11 +131,15 @@ fitFlag <- opt$fitness
 # Gentle or stringent optimization
 opttypeFlag <- opt$opttype
 
-
 # Energy test
-check <- ener_lj(ipars)
+if (potFlag == "lj") {
+	check <- ener_lj(ipars)
+} else if (potFlag == "eten"){
+	check <- ener_eten(ipars)
+}
 
-save(list=c("check"),file="check_dims.RData")
+ener_check(check,0.1)
+
 save.image("check.RData")
 
 cat("Made it here\n")
