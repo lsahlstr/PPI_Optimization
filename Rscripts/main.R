@@ -323,17 +323,18 @@ old_new <- data.frame(respair=respairs,
 	rij_initial=ipars[((len/2)+1):len],
 	rij_optimized=bestPars[((len/2)+1):len])
 
-save.image("check.RData")
-cat("Made it here\n")
-cat(sprintf("%s\n\n",date()))
-stop()
-
-
 
 #######################################################################
 # Compute enrichment score based upon sorted energies and RMSD values
 #######################################################################
 enrich_write <- ddply(.dat=rmsd_ener,.var=c("system"),.fun=enrichment)
+
+
+save.image("check.RData")
+cat("Made it here\n")
+cat(sprintf("%s\n\n",date()))
+stop()
+
 
 
 #######################################################################
