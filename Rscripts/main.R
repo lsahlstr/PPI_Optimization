@@ -94,6 +94,10 @@ source('~/repos/PPI_Optimization/Rscripts/ener.R')
 source('~/repos/PPI_Optimization/Rscripts/big_pars.R')
 # Energy check
 source('~/repos/PPI_Optimization/Rscripts/ener_check.R')
+# Fitness functions
+source('~/repos/PPI_Optimization/Rscripts/fitness.R')
+# Evaluate fitness functions
+source('~/repos/PPI_Optimization/Rscripts/fitness_eval.R')
 
 
 #######################################################################
@@ -142,13 +146,6 @@ if (potFlag == "lj") {
 
 ener_check(check,0.1)
 
-save.image("check.RData")
-
-cat("Made it here\n")
-cat(sprintf("%s\n\n",date()))
-stop()
-
-
 #######################################################################
 # Genetic Algorithm optimization
 #######################################################################
@@ -181,7 +178,8 @@ for (i in 1:len) {
 }
 min <- c(min_eps,min_rmin) 
 max <- c(max_eps,max_rmin)
-	
+
+
 # Initial solution
 initialSolution <- matrix(ipars,ncol=length(ipars),nrow=popSize,byrow=T)  # ipars_mask
 
@@ -191,15 +189,21 @@ if (potFlag == "eten") {
 	if (fitFlag == "zscore") {
 		ffunc <- fitnessZ_eten
     } else {
-    	ffunc <- fitnessSLR_eten
+    	#ffunc <- fitnessSLR_eten
 	}
 } else {
 	if (fitFlag == "zscore") {
 		ffunc <- fitnessZ_lj
     } else {
-    	ffunc <- fitnessSLR_lj
+    	#ffunc <- fitnessSLR_lj
 	}
 }
+
+save.image("check.RData")
+
+cat("Made it here\n")
+cat(sprintf("%s\n\n",date()))
+stop()
 
 # Run GA
 cat(sprintf("%s\n\n",date()))
