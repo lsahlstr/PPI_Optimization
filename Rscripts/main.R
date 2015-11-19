@@ -189,32 +189,32 @@ if (potFlag == "eten") {
 	if (fitFlag == "zscore") {
 		ffunc <- fitnessZ_eten
     } else {
-    	#ffunc <- fitnessSLR_eten
+    	ffunc <- fitnessSLR_eten
 	}
 } else {
 	if (fitFlag == "zscore") {
 		ffunc <- fitnessZ_lj
     } else {
-    	#ffunc <- fitnessSLR_lj
+    	ffunc <- fitnessSLR_lj
 	}
 }
-
-save.image("check.RData")
-
-cat("Made it here\n")
-cat(sprintf("%s\n\n",date()))
-stop()
 
 # Run GA
 cat(sprintf("%s\n\n",date()))
 GAReal <- ga(type = "real-valued", fitness=ffunc, min=min, max=max, popSize=popSize, maxiter=iters, suggestions=jitter(initialSolution), keepBest=T, parallel=TRUE) 
 cat(sprintf("%s\n\n",date()))
 
+
 # Save data from all GA cycles to R data structure
 save(GAReal,file="GA.RData")
 
 # Best solution from GA optimization
 bestPars <- as.vector(GAReal@bestSol[[iters]][1,])
+
+save.image("check.RData")
+cat("Made it here\n")
+cat(sprintf("%s\n\n",date()))
+stop()
 
 
 #######################################################################
