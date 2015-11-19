@@ -136,6 +136,8 @@ if (potFlag == "lj") {
 	check <- ener_lj(ipars)
 } else if (potFlag == "eten"){
 	check <- ener_eten(ipars)
+} else if (potFlag == "etsr"){
+	check <- ener_etsr(ipars)
 }
 
 ener_check(check,0.1)
