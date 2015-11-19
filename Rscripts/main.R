@@ -83,9 +83,10 @@ rij <- rij_rmsd_data[,c(-1,-2,-3,-4)]
 # Source external routines
 #######################################################################
 # Combine energy and distance parameters
-source('~/repos/PPI_Optimization/Rscripts/combine_pars.R')
+workdir <- '~/repos/PPI_Optimization/Rscripts/'
+source(paste(workdir,'combine_pars.R',sep="")
 # Fitness functions
-source('~/repos/PPI_Optimization/Rscripts/fitness.R')
+source(paste(workdir,'fitness.R',sep=""))
 # Enrichment score
 source('~/repos/PPI_Optimization/Rscripts/enrich.R')
 # Energy routine
@@ -155,68 +156,15 @@ ener_check(check,0.1)
 # Genetic Algorithm optimization
 #######################################################################
 # Setup parameters
+len <- length(ipars)
 popSize <- opt$popsize
 iters <- opt$ncycles
-
-# Define min and max
-min_eps <- NULL
-max_eps <- NULL
-min_rmin <- NULL
-max_rmin <- NULL
-
-len <- length(ipars)
-for (i in 1:len) {
-	# eps
-	if (i <= (len/2)) {	
-		if (opttypeFlag == "gentle") {
-			min_eps[i] <- (ipars[i] - (0.5*ipars[i])) # opt$minval
-			max_eps[i] <- (ipars[i] + (0.5*ipars[i])) # opt$maxval
-		} else {
-			min_eps[i] <- opt$minval
-			max_eps[i] <- opt$maxval
-		}
-	# rmin		
-	} else {
-		min_rmin[(i-(len/2))] <- (ipars[i] - (1.0*rminSD[(i-(len/2))]))
-		max_rmin[(i-(len/2))] <- (ipars[i] + (1.0*rminSD[(i-(len/2))]))
-	}
-}
-min <- c(min_eps,min_rmin) 
-max <- c(max_eps,max_rmin)
-
-
-# Initial solution
-initialSolution <- matrix(ipars,ncol=length(ipars),nrow=popSize,byrow=T)  # ipars_mask
-
-# GA to assign weights; fitness function = Z-score for single system
-ffunc <- NULL
-if (potFlag == "lj") {
-	if (fitFlag == "zscore") {
-		ffunc <- fitnessZ_lj
-    } else {
-    	ffunc <- fitnessSLR_lj
-	}
-} else if (potFlag == "eten"){
-	if (fitFlag == "zscore") {
-		ffunc <- fitnessZ_eten
-    } else {
-    	ffunc <- fitnessSLR_eten
-	}
-} else if (potFlag == "etsr"){
-	if (fitFlag == "zscore") {
-		ffunc <- fitnessZ_etsr
-    } else {
-    	ffunc <- fitnessSLR_etsr
-	}
-}
+eps_min_val <- opt$minval
+eps_max_val <- opt$maxval
 
 # Run GA
-cat(sprintf("%s\n\n",date()))
-GAReal <- ga(type = "real-valued", fitness=ffunc, min=min, max=max, popSize=popSize, maxiter=iters, suggestions=jitter(initialSolution), keepBest=T, parallel=TRUE) 
-cat(sprintf("%s\n\n",date()))
-
-# Save data from all GA cycles to R data structure
-save(GAReal,file="GA.RData")
+source('~/repos/PPI_Optimization/Rscripts/ga_opt.R')
+GAReal <- ga_opt()
 
 # Best solution from GA optimization
 bestPars <- as.vector(GAReal@bestSol[[iters]][1,])

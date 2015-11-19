@@ -1,7 +1,7 @@
 #######################################################################
 # Routine to compute enrichment score. data = rmsd_ener from main.R
 #######################################################################
-enrichment <- function(data,thresholds=seq(0.05,0.20,0.05)){
+enrichment <- function(data,thresholds=seq(0.05,0.20,0.05)) {
     enrich <- NULL
     for (threshold in thresholds) {
 		nhits <- floor(threshold*nrow(data))
