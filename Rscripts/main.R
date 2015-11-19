@@ -185,17 +185,23 @@ initialSolution <- matrix(ipars,ncol=length(ipars),nrow=popSize,byrow=T)  # ipar
 
 # GA to assign weights; fitness function = Z-score for single system
 ffunc <- NULL
-if (potFlag == "eten") {
+if (potFlag == "lj") {
+	if (fitFlag == "zscore") {
+		ffunc <- fitnessZ_lj
+    } else {
+    	ffunc <- fitnessSLR_lj
+	}
+} else if (potFlag == "eten"){
 	if (fitFlag == "zscore") {
 		ffunc <- fitnessZ_eten
     } else {
     	ffunc <- fitnessSLR_eten
 	}
-} else {
+} else if (potFlag == "etsr"){
 	if (fitFlag == "zscore") {
-		ffunc <- fitnessZ_lj
+		ffunc <- fitnessZ_etsr
     } else {
-    	ffunc <- fitnessSLR_lj
+    	ffunc <- fitnessSLR_etsr
 	}
 }
 
@@ -212,6 +218,7 @@ save(GAReal,file="GA.RData")
 bestPars <- as.vector(GAReal@bestSol[[iters]][1,])
 
 save.image("check.RData")
+
 cat("Made it here\n")
 cat(sprintf("%s\n\n",date()))
 stop()
