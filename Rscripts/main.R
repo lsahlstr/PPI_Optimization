@@ -295,11 +295,6 @@ if (potFlag == "lj") {
 	
 }
 
-save.image("check.RData")
-cat("Made it here\n")
-cat(sprintf("%s\n\n",date()))
-stop()
-
 
 #######################################################################
 # Compute energies with initial ("old") and optimized ("new") parameters
@@ -307,26 +302,19 @@ stop()
 # information and old and new parameters, and then write to output files.
 #######################################################################
 # RMSD and energy
-if (potFlag == "eten") {
-	
-	rmsd_ener <- calE_eten(bestPars,r12,r10,r6,m,n,tmp_info)
-	rmsd_ener$oldenergy <- calE_eten(ipars,r12,r10,r6,m,n,tmp_info)$ener
-	
-	rmsd_ener_test <- calE_eten(bestPars,r12_test,r10_test,r6_test,m_test,n_test,tmp_info_test)
-	rmsd_ener_test$oldenergy <- calE_eten(ipars,r12_test,r10_test,r6_test,m_test,n_test,tmp_info_test)$ener
-	
-} else {
-
-	rmsd_ener <- calE_lj(bestPars,r12,r6,m,n,tmp_info)
-	rmsd_ener$oldenergy <- calE_lj(ipars,r12,r6,m,n,tmp_info)$ener
-	
-	rmsd_ener_test <- calE_lj(bestPars,r12_test,r6_test,m_test,n_test,tmp_info_test)
-	rmsd_ener_test$oldenergy <- calE_lj(ipars,r12_test,r6_test,m_test,n_test,tmp_info_test)$ener
-	
+# !!! COMPUTE FOR "TEST" CASES !!!
+if (potFlag == "lj") {
+	rmsd_ener <- ener_lj(bestPars)
+	rmsd_ener$oldenergy <- ener_lj(ipars)$ener
+} else if (potFlag == "eten"){
+	rmsd_ener <- ener_eten(bestPars)
+	rmsd_ener$oldenergy <- ener_eten(ipars)$ener
+} else if (potFlag == "etsr"){
+	rmsd_ener <- ener_etsr(bestPars)
+	rmsd_ener$oldenergy <- ener_etsr(ipars)$ener
 }
 
 rmsd_ener <- rmsd_ener[order(rmsd_ener$system,rmsd_ener$ener),]
-rmsd_ener_test <- rmsd_ener_test[order(rmsd_ener_test$system,rmsd_ener_test$ener),]
 
 # Old and new parameters
 old_new <- data.frame(respair=respairs, 
@@ -334,6 +322,12 @@ old_new <- data.frame(respair=respairs,
 	eij_optimized=bestPars[1:(len/2)],
 	rij_initial=ipars[((len/2)+1):len],
 	rij_optimized=bestPars[((len/2)+1):len])
+
+save.image("check.RData")
+cat("Made it here\n")
+cat(sprintf("%s\n\n",date()))
+stop()
+
 
 
 #######################################################################
