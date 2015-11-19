@@ -98,11 +98,16 @@ source('~/repos/PPI_Optimization/Rscripts/ener_check.R')
 source('~/repos/PPI_Optimization/Rscripts/fitness.R')
 # Evaluate fitness functions
 source('~/repos/PPI_Optimization/Rscripts/fitness_eval.R')
+# Evaluate fitness functions for each individual system
+source('~/repos/PPI_Optimization/Rscripts/fitness_eval_indiv.R')
 
 
 #######################################################################
 # Read data
 #######################################################################    
+# List of PDB ID's for each system
+pdbs <- read.table(opt$list)$V1
+
 # Initial eps values
 eps_file <- read.table(opt$eps)
 eps <- eps_file$V2
@@ -210,18 +215,11 @@ cat(sprintf("%s\n\n",date()))
 GAReal <- ga(type = "real-valued", fitness=ffunc, min=min, max=max, popSize=popSize, maxiter=iters, suggestions=jitter(initialSolution), keepBest=T, parallel=TRUE) 
 cat(sprintf("%s\n\n",date()))
 
-
 # Save data from all GA cycles to R data structure
 save(GAReal,file="GA.RData")
 
 # Best solution from GA optimization
 bestPars <- as.vector(GAReal@bestSol[[iters]][1,])
-
-save.image("check.RData")
-
-cat("Made it here\n")
-cat(sprintf("%s\n\n",date()))
-stop()
 
 
 #######################################################################
@@ -229,15 +227,21 @@ stop()
 #######################################################################
 zscore <- NULL
 slr <- NULL
-if (potFlag == "eten") {
+
+if (potFlag == "lj") {
 	for (i in 1:iters) {
-		zscore <- c(zscore,calZ_eten(as.vector(GAReal@bestSol[[i]][1,])))
-		slr <- c(slr,calSLR_eten(as.vector(GAReal@bestSol[[i]][1,])))
+		zscore <- c(zscore,-1*fitnessZ_lj(as.vector(GAReal@bestSol[[i]][1,])))
+		slr <- c(slr,fitnessSLR_lj(as.vector(GAReal@bestSol[[i]][1,])))
 	}
-} else {
+} else if (potFlag == "eten") {
 	for (i in 1:iters) {
-		zscore <- c(zscore,calZ_lj(as.vector(GAReal@bestSol[[i]][1,])))
-		slr <- c(slr,calSLR_lj(as.vector(GAReal@bestSol[[i]][1,])))
+		zscore <- c(zscore,-1*fitnessZ_eten(as.vector(GAReal@bestSol[[i]][1,])))
+		slr <- c(slr,fitnessSLR_eten(as.vector(GAReal@bestSol[[i]][1,])))
+	}
+} else if (potFlag == "etsr") {
+	for (i in 1:iters) {
+		zscore <- c(zscore,-1*fitnessZ_etsr(as.vector(GAReal@bestSol[[i]][1,])))
+		slr <- c(slr,fitnessSLR_etsr(as.vector(GAReal@bestSol[[i]][1,])))
 	}
 }
 
@@ -253,31 +257,48 @@ zscore_indiv_new <- NULL
 slr_indiv_old <- NULL
 slr_indiv_new <- NULL
 
-if (potFlag == "eten") {
+if (potFlag == "lj") {
 
-	zscore_indiv_old <- calZ_eten_indiv(ipars)
-	zscore_indiv_new <- calZ_eten_indiv(bestPars)
+	zscore_indiv_old <- fitnessZ_lj_indiv(ipars)
+	zscore_indiv_new <- fitnessZ_lj_indiv(bestPars)
 	zscore_indiv_write <- data.frame(old=zscore_indiv_old,new=zscore_indiv_new)
 	zscore_indiv_write$pdb <- pdbs
 	
-	slr_indiv_old <- calSLR_eten_indiv(ipars)
-	slr_indiv_new <- calSLR_eten_indiv(bestPars)
+	slr_indiv_old <- fitnessSLR_eten_indiv(ipars)
+	slr_indiv_new <- fitnessSLR_eten_indiv(bestPars)
 	slr_indiv_write <- data.frame(old=slr_indiv_old,new=slr_indiv_new)
 	slr_indiv_write$pdb <- pdbs
 
-} else {
+} else if (potFlag == "eten") {
 
-	zscore_indiv_old <- calZ_lj_indiv(ipars)
-	zscore_indiv_new <- calZ_lj_indiv(bestPars)
+	zscore_indiv_old <- fitnessZ_eten_indiv(ipars)
+	zscore_indiv_new <- fitnessZ_eten_indiv(bestPars)
 	zscore_indiv_write <- data.frame(old=zscore_indiv_old,new=zscore_indiv_new)
 	zscore_indiv_write$pdb <- pdbs
+	
+	slr_indiv_old <- fitnessSLR_eten_indiv(ipars)
+	slr_indiv_new <- fitnessSLR_eten_indiv(bestPars)
+	slr_indiv_write <- data.frame(old=slr_indiv_old,new=slr_indiv_new)
+	slr_indiv_write$pdb <- pdbs
 
-	slr_indiv_old <- calSLR_lj_indiv(ipars)
-	slr_indiv_new <- calSLR_lj_indiv(bestPars)
+} else if (potFlag == "etsr") {
+
+	zscore_indiv_old <- fitnessZ_etsr_indiv(ipars)
+	zscore_indiv_new <- fitnessZ_etsr_indiv(bestPars)
+	zscore_indiv_write <- data.frame(old=zscore_indiv_old,new=zscore_indiv_new)
+	zscore_indiv_write$pdb <- pdbs
+	
+	slr_indiv_old <- fitnessSLR_eten_indiv(ipars)
+	slr_indiv_new <- fitnessSLR_eten_indiv(bestPars)
 	slr_indiv_write <- data.frame(old=slr_indiv_old,new=slr_indiv_new)
 	slr_indiv_write$pdb <- pdbs
 	
 }
+
+save.image("check.RData")
+cat("Made it here\n")
+cat(sprintf("%s\n\n",date()))
+stop()
 
 
 #######################################################################
