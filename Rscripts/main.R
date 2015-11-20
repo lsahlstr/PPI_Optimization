@@ -65,6 +65,7 @@ cat("Purpose: To determine a set of parameters (eps_ij and rmin_ij) that yield n
 cat("Authors: Logan S. Ahlstrom and Aaron T. Frank\n")
 cat(sprintf("%s\n\n",date()))
 
+
 #######################################################################
 # Load R image file with distance and RMSD information; rij_data; rij_rmsd_data
 #######################################################################
@@ -79,28 +80,28 @@ sysinfo <- data.frame(flag=rij_rmsd_data[,1],system=rij_rmsd_data[,2],rmsd=rij_r
 # Just the distance information (rij)
 rij <- rij_rmsd_data[,c(-1,-2,-3,-4)]
 
+
 #######################################################################
 # Source external routines
 #######################################################################
-# Combine energy and distance parameters
+# Directory with R scripts
 workdir <- '~/repos/PPI_Optimization/Rscripts/'
-source(paste(workdir,'combine_pars.R',sep="")
+# Combine energy and distance parameters
+source(paste(workdir,'combine_pars.R',sep=""))
 # Fitness functions
 source(paste(workdir,'fitness.R',sep=""))
-# Enrichment score
-source('~/repos/PPI_Optimization/Rscripts/enrich.R')
 # Energy routine
-source('~/repos/PPI_Optimization/Rscripts/ener.R')
+source(paste(workdir,'ener.R',sep=""))
 # Epsilon and Rmin data structures
-source('~/repos/PPI_Optimization/Rscripts/big_pars.R')
+source(paste(workdir,'big_pars.R',sep=""))
 # Energy check
-source('~/repos/PPI_Optimization/Rscripts/ener_check.R')
+source(paste(workdir,'ener_check.R',sep=""))
 # Fitness functions
-source('~/repos/PPI_Optimization/Rscripts/fitness.R')
+source(paste(workdir,'fitness.R',sep=""))
 # Evaluate fitness functions
-source('~/repos/PPI_Optimization/Rscripts/fitness_eval.R')
+source(paste(workdir,'fitness_eval.R',sep=""))
 # Evaluate fitness functions for each individual system
-source('~/repos/PPI_Optimization/Rscripts/fitness_eval_indiv.R')
+source(paste(workdir,'fitness_eval_indiv.R',sep=""))
 
 
 #######################################################################
@@ -162,8 +163,11 @@ iters <- opt$ncycles
 eps_min_val <- opt$minval
 eps_max_val <- opt$maxval
 
+# Initial solution
+initialSolution <- matrix(ipars,ncol=length(ipars),nrow=popSize,byrow=T)
+
 # Run GA
-source('~/repos/PPI_Optimization/Rscripts/ga_opt.R')
+source(paste(workdir,'ga_opt.R',sep=""))
 GAReal <- ga_opt()
 
 # Best solution from GA optimization
@@ -171,138 +175,27 @@ bestPars <- as.vector(GAReal@bestSol[[iters]][1,])
 
 
 #######################################################################
-# Get the mean Z-score and SLR at each iteration
+# Analysis
 #######################################################################
-zscore <- NULL
-slr <- NULL
+# Get the mean Z-score and SLR at each cycle
+source(paste(workdir,'fitness_cycle.R',sep=""))
+fitness_cycle()
 
-if (potFlag == "lj") {
-	for (i in 1:iters) {
-		zscore <- c(zscore,-1*fitnessZ_lj(as.vector(GAReal@bestSol[[i]][1,])))
-		slr <- c(slr,fitnessSLR_lj(as.vector(GAReal@bestSol[[i]][1,])))
-	}
-} else if (potFlag == "eten") {
-	for (i in 1:iters) {
-		zscore <- c(zscore,-1*fitnessZ_eten(as.vector(GAReal@bestSol[[i]][1,])))
-		slr <- c(slr,fitnessSLR_eten(as.vector(GAReal@bestSol[[i]][1,])))
-	}
-} else if (potFlag == "etsr") {
-	for (i in 1:iters) {
-		zscore <- c(zscore,-1*fitnessZ_etsr(as.vector(GAReal@bestSol[[i]][1,])))
-		slr <- c(slr,fitnessSLR_etsr(as.vector(GAReal@bestSol[[i]][1,])))
-	}
-}
+# Z-score and SLR for each system before and after optimization
+source(paste(workdir,'fitness_before_after.R',sep=""))
+fitness_before_after()
 
-zscore <- data.frame(iters=1:iters,score=zscore)
-slr <- data.frame(iters=1:iters,score=slr)
+# Compute energies with initial and optimized parameters; combine with RMSD and system information
+source(paste(workdir,'rmsd_ener.R',sep=""))
+rmsd_ener <- rmsd_ener()
 
+# Enrichment score
+source(paste(workdir,'enrich.R',sep=""))
+test <- ddply(.dat=rmsd_ener,.var=c("system"),.fun=enrichment)
 
-#######################################################################
-# Z-score and SLR for each system after final optimization cycle
-#######################################################################
-zscore_indiv_old <- NULL
-zscore_indiv_new <- NULL
-slr_indiv_old <- NULL
-slr_indiv_new <- NULL
-
-if (potFlag == "lj") {
-
-	zscore_indiv_old <- fitnessZ_lj_indiv(ipars)
-	zscore_indiv_new <- fitnessZ_lj_indiv(bestPars)
-	zscore_indiv_write <- data.frame(old=zscore_indiv_old,new=zscore_indiv_new)
-	zscore_indiv_write$pdb <- pdbs
-	
-	slr_indiv_old <- fitnessSLR_eten_indiv(ipars)
-	slr_indiv_new <- fitnessSLR_eten_indiv(bestPars)
-	slr_indiv_write <- data.frame(old=slr_indiv_old,new=slr_indiv_new)
-	slr_indiv_write$pdb <- pdbs
-
-} else if (potFlag == "eten") {
-
-	zscore_indiv_old <- fitnessZ_eten_indiv(ipars)
-	zscore_indiv_new <- fitnessZ_eten_indiv(bestPars)
-	zscore_indiv_write <- data.frame(old=zscore_indiv_old,new=zscore_indiv_new)
-	zscore_indiv_write$pdb <- pdbs
-	
-	slr_indiv_old <- fitnessSLR_eten_indiv(ipars)
-	slr_indiv_new <- fitnessSLR_eten_indiv(bestPars)
-	slr_indiv_write <- data.frame(old=slr_indiv_old,new=slr_indiv_new)
-	slr_indiv_write$pdb <- pdbs
-
-} else if (potFlag == "etsr") {
-
-	zscore_indiv_old <- fitnessZ_etsr_indiv(ipars)
-	zscore_indiv_new <- fitnessZ_etsr_indiv(bestPars)
-	zscore_indiv_write <- data.frame(old=zscore_indiv_old,new=zscore_indiv_new)
-	zscore_indiv_write$pdb <- pdbs
-	
-	slr_indiv_old <- fitnessSLR_eten_indiv(ipars)
-	slr_indiv_new <- fitnessSLR_eten_indiv(bestPars)
-	slr_indiv_write <- data.frame(old=slr_indiv_old,new=slr_indiv_new)
-	slr_indiv_write$pdb <- pdbs
-	
-}
-
-
-#######################################################################
-# Compute energies with initial ("old") and optimized ("new") parameters
-# and combine with RMSD and system information. Organize energy and RMSD 
-# information and old and new parameters, and then write to output files.
-#######################################################################
-# RMSD and energy
-# !!! COMPUTE FOR "TEST" CASES !!!
-if (potFlag == "lj") {
-	rmsd_ener <- ener_lj(bestPars)
-	rmsd_ener$oldenergy <- ener_lj(ipars)$ener
-} else if (potFlag == "eten"){
-	rmsd_ener <- ener_eten(bestPars)
-	rmsd_ener$oldenergy <- ener_eten(ipars)$ener
-} else if (potFlag == "etsr"){
-	rmsd_ener <- ener_etsr(bestPars)
-	rmsd_ener$oldenergy <- ener_etsr(ipars)$ener
-}
-
-rmsd_ener <- rmsd_ener[order(rmsd_ener$system,rmsd_ener$ener),]
-
-# Old and new parameters
-old_new <- data.frame(respair=respairs, 
-	eij_initial=ipars[1:(len/2)], 
-	eij_optimized=bestPars[1:(len/2)],
-	rij_initial=ipars[((len/2)+1):len],
-	rij_optimized=bestPars[((len/2)+1):len])
-
-
-#######################################################################
-# Compute enrichment score based upon sorted energies and RMSD values
-#######################################################################
-enrich_write <- ddply(.dat=rmsd_ener,.var=c("system"),.fun=enrichment)
-
-
-save.image("check.RData")
-cat("Made it here\n")
-cat(sprintf("%s\n\n",date()))
-stop()
-
-
-
-#######################################################################
-# Write data to output
-#######################################################################
-write.table(old_new,file="OldNewComp.txt",row.names=F,quote=F,col.names=T)
-write.table(rmsd_ener,file="rmsdEnerComp.txt",row.names=F,quote=F,col.names=F)
-write.table(rmsd_ener_test,file="rmsdEnerComp_test.txt",row.names=F,quote=F,col.names=F)
-write.table(zscore,file="zscore.dat",row.names=F,quote=F,col.names=F)
-write.table(zscore_indiv_write,file="zscore_indiv.dat",row.names=F,quote=F,col.names=F)
-write.table(slr,file="slr.dat",row.names=F,quote=F,col.names=F)
-write.table(slr_indiv_write,file="slr_indiv.dat",row.names=F,quote=F,col.names=F)
-write.table(enrich_write,file="enrich.dat",row.names=F,quote=F,col.names=F)
-
-
-#######################################################################
 # Save R environment variables and image
-#######################################################################
-save(list=c("initialSolution","ipars","bestPars","min","max","list","rmsd_ener","old_new"),file="check.RData")
-save.image("image.RData")
+#save(list=c("initialSolution","ipars","bestPars","min","max","list","rmsd_ener","old_new"),file="check.RData")
+save.image("opt.RData")
 
 cat("Done!\n")
 cat(sprintf("%s\n\n",date()))

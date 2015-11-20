@@ -24,10 +24,6 @@ ga_opt <- function() {
 	min <- c(min_eps,min_rmin) 
 	max <- c(max_eps,max_rmin)
 
-
-	# Initial solution
-	initialSolution <- matrix(ipars,ncol=length(ipars),nrow=popSize,byrow=T)
-
 	# GA to assign weights; fitness function = Z-score for single system
 	ffunc <- NULL
 	if (potFlag == "lj") {
