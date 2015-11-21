@@ -1,4 +1,5 @@
 ga_opt <- function() {
+	
 	# Define min and max
 	min_eps <- NULL
 	max_eps <- NULL
@@ -24,7 +25,7 @@ ga_opt <- function() {
 	min <- c(min_eps,min_rmin) 
 	max <- c(max_eps,max_rmin)
 
-	# GA to assign weights; fitness function = Z-score for single system
+	# GA to assign weights
 	ffunc <- NULL
 	if (potFlag == "lj") {
 		if (fitFlag == "zscore") {

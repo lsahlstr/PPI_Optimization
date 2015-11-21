@@ -1,22 +1,13 @@
 #!/export/apps/R/3.1.2/bin/Rscript
 #######################################################################
-# R script for implementing the Genetic Algorithm in the force-field 
-# optimization of coarse-grained protein-protein binding simulations.
-# Energies and distances are optimized simultaneously. 
-#
-# 	Initial version of the code written to optimize eij parameters 
-#	with different fitness functions
-#		Aaron Frank, U. Michigan, c. 2015
-#	Code further developed to optimize eij and rmin simultaneously 
-#	and with different potential and fitness functions
-#		Logan S. Ahlstrom, U. Michigan c. 2015
+# R script for running a Genetic Algorithm-based optimization of a 
+# coarse-grained protein-protein interaction force field. 
+#		Logan S. Ahlstrom and Aaron T. Frank, U. Michigan c. 2015
 #######################################################################
 
 
 #######################################################################
-# Load required libraries. 
-# 	GA = genetic algorithm
-# 	plyr = package for splitting, applying, and combining data.
+# Load libraries
 #######################################################################
 suppressPackageStartupMessages(library("optparse"))
 suppressPackageStartupMessages(library("GA"))
@@ -60,25 +51,10 @@ parser <- OptionParser(usage = "%prog [options] epsilonFile rminFile maskFile po
 arguments <- parse_args(parser, positional_arguments = TRUE)
 opt <- arguments$options
 
-cat("\nProject: Energy Landscape Theory optimization of a coarse-grained protein-protein interaction force field.\n")
-cat("Purpose: To determine a set of parameters (eps_ij and rmin_ij) that yield native-like interfaces as the lowest energy states.\n")
+cat("\nProject: Optimization of a predictive coarse-grained protein-protein interaction force field.\n")
+cat("Purpose: To determine a set of interaction energies and distances that yield native-like interfaces as the lowest energy states.\n")
 cat("Authors: Logan S. Ahlstrom and Aaron T. Frank\n")
 cat(sprintf("%s\n\n",date()))
-
-
-#######################################################################
-# Load R image file with distance and RMSD information; rij_data; rij_rmsd_data
-#######################################################################
-load(opt$rdatafile)
-
-# number of instances of each i,j interaction in rij_rmsd_data 
-lsize <- 1000
-
-# Training set:
-# Get system info: flag, system, rmsd, and conformer
-sysinfo <- data.frame(flag=rij_rmsd_data[,1],system=rij_rmsd_data[,2],rmsd=rij_rmsd_data[,3],conf=rij_rmsd_data[,4])
-# Just the distance information (rij)
-rij <- rij_rmsd_data[,c(-1,-2,-3,-4)]
 
 
 #######################################################################
@@ -102,11 +78,33 @@ source(paste(workdir,'fitness.R',sep=""))
 source(paste(workdir,'fitness_eval.R',sep=""))
 # Evaluate fitness functions for each individual system
 source(paste(workdir,'fitness_eval_indiv.R',sep=""))
+# Genetic Algorithm optimization
+source(paste(workdir,'ga_opt.R',sep=""))
+# Mean Z-score and SLR at each cycle
+source(paste(workdir,'fitness_cycle.R',sep=""))
+# Z-score and SLR for each system before and after optimization
+source(paste(workdir,'fitness_before_after.R',sep=""))
+# Compute energies with initial and optimized parameters; combine with RMSD and system information
+source(paste(workdir,'rmsd_ener.R',sep=""))
+# Enrichment score
+source(paste(workdir,'enrich.R',sep=""))
 
 
 #######################################################################
 # Read data
 #######################################################################    
+# Load R image file with distance information
+load(opt$rdatafile)
+
+# rij
+rij <- rij_rmsd_data[,c(-1,-2,-3,-4)]
+
+# System info: flag, system, rmsd, and conformer
+sysinfo <- data.frame(flag=rij_rmsd_data[,1],system=rij_rmsd_data[,2],rmsd=rij_rmsd_data[,3],conf=rij_rmsd_data[,4])
+
+# Number of instances of each i,j interaction in rij_rmsd_data 
+lsize <- 1000
+
 # List of PDB ID's for each system
 pdbs <- read.table(opt$list)$V1
 
@@ -124,7 +122,7 @@ ipars <- c(eps,rmin)
 
 # Get residue pair names
 respairs <- eps_file$V1
-		
+	
 # Mask file
 mask_file <- read.table(opt$mask)
 mask <- mask_file$V2
@@ -143,15 +141,8 @@ fitFlag <- opt$fitness
 opttypeFlag <- opt$opttype
 
 # Energy test
-if (potFlag == "lj") {
-	check <- ener_lj(ipars)
-} else if (potFlag == "eten"){
-	check <- ener_eten(ipars)
-} else if (potFlag == "etsr"){
-	check <- ener_etsr(ipars)
-}
+ener_check(0.1)
 
-ener_check(check,0.1)
 
 #######################################################################
 # Genetic Algorithm optimization
@@ -167,7 +158,6 @@ eps_max_val <- opt$maxval
 initialSolution <- matrix(ipars,ncol=length(ipars),nrow=popSize,byrow=T)
 
 # Run GA
-source(paste(workdir,'ga_opt.R',sep=""))
 GAReal <- ga_opt()
 
 # Best solution from GA optimization
@@ -177,24 +167,19 @@ bestPars <- as.vector(GAReal@bestSol[[iters]][1,])
 #######################################################################
 # Analysis
 #######################################################################
-# Get the mean Z-score and SLR at each cycle
-source(paste(workdir,'fitness_cycle.R',sep=""))
+# Mean Z-score and SLR at each cycle
 fitness_cycle()
 
 # Z-score and SLR for each system before and after optimization
-source(paste(workdir,'fitness_before_after.R',sep=""))
 fitness_before_after()
 
 # Compute energies with initial and optimized parameters; combine with RMSD and system information
-source(paste(workdir,'rmsd_ener.R',sep=""))
 rmsd_ener <- rmsd_ener()
 
 # Enrichment score
-source(paste(workdir,'enrich.R',sep=""))
 test <- ddply(.dat=rmsd_ener,.var=c("system"),.fun=enrichment)
 
 # Save R environment variables and image
-#save(list=c("initialSolution","ipars","bestPars","min","max","list","rmsd_ener","old_new"),file="check.RData")
 save.image("opt.RData")
 
 cat("Done!\n")

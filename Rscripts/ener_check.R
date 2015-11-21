@@ -1,11 +1,18 @@
 #######################################################################
 # Check energies computed in R with CHARMM energies
 #######################################################################
-ener_check <- function(check,tol=0.01){
+ener_check <- function(tol=0.01){
 		
 	ener_ref_file <- read.table("charmm.ener")
 	ener_ref <- ener_ref_file$V1
 	
+	if (potFlag == "lj") {
+		check <- ener_lj(ipars)
+	} else if (potFlag == "eten"){
+		check <- ener_eten(ipars)
+	} else if (potFlag == "etsr"){
+		check <- ener_etsr(ipars)
+	}
 	ener_comp <- check$ener
 	
 	diff <- abs(ener_comp - ener_ref)
