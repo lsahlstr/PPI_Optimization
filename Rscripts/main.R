@@ -141,7 +141,7 @@ fitFlag <- opt$fitness
 opttypeFlag <- opt$opttype
 
 # Energy test
-ener_check(0.1)
+# ener_check(0.1)
 
 
 #######################################################################

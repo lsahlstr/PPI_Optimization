@@ -26,11 +26,13 @@
 # Logan S. Ahlstrom and Aaron T. Frank, U. Michigan c. 2015
 #######################################################################
 
+
 #######################################################################
 # Load required libraries
 #######################################################################
 suppressPackageStartupMessages(library("optparse"))
 suppressPackageStartupMessages(library("ptw"))
+
 
 #######################################################################
 # Command line arguments
@@ -47,17 +49,28 @@ parser <- OptionParser(usage = "%prog [options] pdblist respairs", option_list=o
 arguments <- parse_args(parser, positional_arguments = TRUE)
 opt <- arguments$options
 
+
+#######################################################################
+# Source external routines
+#######################################################################
+# Directory with R scripts
+workdir <- '~/repos/PPI_Optimization/Rscripts/'
+# Format rij information for a single system
+source(paste(workdir,'format_rij_rmsd.R',sep=""))
+# Combine rij information across multiple systems
+source(paste(workdir,'combine_rij_rmsd.R',sep=""))
+
+
+#######################################################################
+# Read data
+#######################################################################    
+pdbs <- read.table(opt$list)$V1
+respairs <- read.table(opt$pairs)$V1
+
+
 #######################################################################
 # Read distance and RMSD information
 #######################################################################
-source('~/repos/PPI_Optimization/Rscripts/format_rij_rmsd.R')
-source('~/repos/PPI_Optimization/Rscripts/combine_rij_rmsd.R')
-pdbs <- read.table(opt$list)$V1
-respairs <- read.table(opt$pairs)$V1
 rij_rmsd_data <- combineRijRMSD(pdbs,1000)
-
 datafile_name <- paste(opt$outname,".RData",sep="")
 save(list=c("rij_rmsd_data"),file=datafile_name)
-
-#image_name <- paste(opt$outname,".RData",sep="")
-#save.image(image_name)
