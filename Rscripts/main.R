@@ -143,6 +143,9 @@ opttypeFlag <- opt$opttype
 # Energy test
 # ener_check(0.1)
 
+#cat("made it here\n")
+#cat(sprintf("%s\n\n",date()))
+#stop()
 
 #######################################################################
 # Genetic Algorithm optimization

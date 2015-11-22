@@ -116,9 +116,12 @@ fitnessZ_eten <- function(pars){
 fitnessSLR_eten <- function(pars){
 	
 	# Make large eps and rmin data structures; rij defined globally in main.R	
-  	list <- big_pars (pars)
+  	list <- big_pars(pars)
+  	stop()
   	big_eps_mat <- list$big_eps_mat
   	big_rmin_mat <- list$big_rmin_mat
+	
+	#stop()
 		
 	# r^12 term
 	rmin_12 <- big_rmin_mat**12
