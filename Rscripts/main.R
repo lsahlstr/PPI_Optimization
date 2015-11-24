@@ -75,7 +75,7 @@ source(paste(workdir,'ener_check.R',sep=""))
 # Fitness functions
 source(paste(workdir,'fitness.R',sep=""))
 # Evaluate fitness functions
-source(paste(workdir,'fitness_eval.R',sep=""))
+# source(paste(workdir,'fitness_eval.R',sep=""))
 # Evaluate fitness functions for each individual system
 source(paste(workdir,'fitness_eval_indiv.R',sep=""))
 # Genetic Algorithm optimization
@@ -93,18 +93,6 @@ source(paste(workdir,'enrich.R',sep=""))
 #######################################################################
 # Read data
 #######################################################################    
-# Load R image file with distance information
-load(opt$rdatafile)
-
-# rij
-rij <- rij_rmsd_data[,c(-1,-2,-3,-4)]
-
-# System info: flag, system, rmsd, and conformer
-sysinfo <- data.frame(flag=rij_rmsd_data[,1],system=rij_rmsd_data[,2],rmsd=rij_rmsd_data[,3],conf=rij_rmsd_data[,4])
-
-# Number of instances of each i,j interaction in rij_rmsd_data 
-lsize <- 1000
-
 # List of PDB ID's for each system
 pdbs <- read.table(opt$list)$V1
 
@@ -140,8 +128,33 @@ fitFlag <- opt$fitness
 # Gentle or stringent optimization
 opttypeFlag <- opt$opttype
 
+# Load R image file with distance information
+load(opt$rdatafile)
+
+# rij
+rij <- rij_rmsd_data[,c(-1,-2,-3,-4)]
+
+rij_12 <- 1/rij**12
+rij_12[is.infinite(rij_12)] <- 0
+
+rij_6 <- 1/rij**6
+rij_6[is.infinite(rij_6)] <- 0
+
+if ((potFlag == "eten") || (potFlag == "etsr")) {
+	rij_10 <- 1/rij**10
+	rij_10[is.infinite(rij_10)] <- 0
+}
+
+# System info: flag, system, rmsd, and conformer
+sysinfo <- data.frame(flag=rij_rmsd_data[,1],system=rij_rmsd_data[,2],rmsd=rij_rmsd_data[,3],conf=rij_rmsd_data[,4])
+
+# Number of instances of each i,j interaction in rij_rmsd_data 
+lsize <- 1000
+
 # Energy test
-# ener_check(0.1)
+#check <- ener_check(0.1)
+
+#save.image("check2.RData")
 
 #cat("made it here\n")
 #cat(sprintf("%s\n\n",date()))
@@ -171,19 +184,19 @@ bestPars <- as.vector(GAReal@bestSol[[iters]][1,])
 # Analysis
 #######################################################################
 # Mean Z-score and SLR at each cycle
-fitness_cycle()
+#fitness_cycle()
 
 # Z-score and SLR for each system before and after optimization
-fitness_before_after()
+#fitness_before_after()
 
 # Compute energies with initial and optimized parameters; combine with RMSD and system information
-rmsd_ener <- rmsd_ener()
+#rmsd_ener <- rmsd_ener()
 
 # Enrichment score
-test <- ddply(.dat=rmsd_ener,.var=c("system"),.fun=enrichment)
+#test <- ddply(.dat=rmsd_ener,.var=c("system"),.fun=enrichment)
 
 # Save R environment variables and image
-save.image("opt.RData")
+#save.image("opt.RData")
 
 cat("Done!\n")
 cat(sprintf("%s\n\n",date()))
