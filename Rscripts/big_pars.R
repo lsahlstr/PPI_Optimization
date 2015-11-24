@@ -12,7 +12,7 @@ big_rmin <- function(pars,n=12){
     	
 }
 
-big_eps <- function(pars,n=12){
+big_eps <- function(pars){
 
 	list <- combinePARS(pars)
 	

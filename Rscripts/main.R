@@ -2,7 +2,7 @@
 #######################################################################
 # R script for running a Genetic Algorithm-based optimization of a 
 # coarse-grained protein-protein interaction force field. 
-#		Logan S. Ahlstrom and Aaron T. Frank, U. Michigan c. 2015
+#		Logan S. Ahlstrom, Aaron T. Frank, and Blair Whittington, U. Michigan c. 2015
 #######################################################################
 
 
@@ -196,7 +196,7 @@ bestPars <- as.vector(GAReal@bestSol[[iters]][1,])
 #test <- ddply(.dat=rmsd_ener,.var=c("system"),.fun=enrichment)
 
 # Save R environment variables and image
-#save.image("opt.RData")
+save.image("opt.RData")
 
 cat("Done!\n")
 cat(sprintf("%s\n\n",date()))

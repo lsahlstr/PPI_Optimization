@@ -71,6 +71,6 @@ respairs <- read.table(opt$pairs)$V1
 #######################################################################
 # Read distance and RMSD information
 #######################################################################
-rij_rmsd_data <- combineRijRMSD(pdbs,1000)
+rij_rmsd_data <- combineRijRMSD(pdbs,100)
 datafile_name <- paste(opt$outname,".RData",sep="")
 save(list=c("rij_rmsd_data"),file=datafile_name)
