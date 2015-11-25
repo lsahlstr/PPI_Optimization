@@ -59,6 +59,10 @@ workdir <- '~/repos/PPI_Optimization/Rscripts/'
 source(paste(workdir,'format_rij_rmsd.R',sep=""))
 # Combine rij information across multiple systems
 source(paste(workdir,'combine_rij_rmsd.R',sep=""))
+# Get maximum number of i,j interactions over all systems
+source(paste(workdir,'all_maxnum_rij.R',sep=""))
+# Find maximum number of i,j interactions for a single system
+source(paste(workdir,'maxnum_rij.R',sep=""))
 
 
 #######################################################################
@@ -71,6 +75,8 @@ respairs <- read.table(opt$pairs)$V1
 #######################################################################
 # Read distance and RMSD information
 #######################################################################
-rij_rmsd_data <- combineRijRMSD(pdbs,100)
+lsize <- all_maxnum_rij(pdbs)
+cat(sprintf("%d\n",lsize))
+rij_rmsd_data <- combineRijRMSD(pdbs,lsize)
 datafile_name <- paste(opt$outname,".RData",sep="")
 save(list=c("rij_rmsd_data"),file=datafile_name)

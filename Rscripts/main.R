@@ -45,7 +45,9 @@ option_list <- list(
 	make_option(c("-t", "--opttype"), type="character", default="gentle",
 		help="Flag for optimization type: gentle (refinement) or stringent [default %default]"),
 	make_option(c("-d", "--rdatafile"), type="character", default="rij.RData",
-		help="R data file containing data structure with rij and RMSD information [default %default]")
+		help="R data file containing data structure with rij and RMSD information [default %default]"),
+	make_option(c("-n", "--maxij"), type="integer", default=100,
+        help="Maximum number of i,j interacitons to consider [default %default]")
 )
 parser <- OptionParser(usage = "%prog [options] epsilonFile rminFile maskFile potentialType", option_list=option_list)
 arguments <- parse_args(parser, positional_arguments = TRUE)
@@ -149,7 +151,7 @@ if ((potFlag == "eten") || (potFlag == "etsr")) {
 sysinfo <- data.frame(flag=rij_rmsd_data[,1],system=rij_rmsd_data[,2],rmsd=rij_rmsd_data[,3],conf=rij_rmsd_data[,4])
 
 # Number of instances of each i,j interaction in rij_rmsd_data 
-lsize <- 1000
+lsize <- opt$maxij
 
 # Energy test
 #check <- ener_check(0.1)

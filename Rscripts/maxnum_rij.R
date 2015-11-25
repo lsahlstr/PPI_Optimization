@@ -1,5 +1,5 @@
 #######################################################################
-# Find maximum number of i,j interactions
+# Find maximum number of i,j interactions for a single system
 #######################################################################
 maxnum_rij <- function(pool="n",pdb) {
 		
@@ -23,10 +23,11 @@ maxnum_rij <- function(pool="n",pdb) {
 			name <- names[i]
 			tmp <- c(subset(R,pair==name)$rij)
 			m <- length(tmp)
-			if (m > 0) {
+			cat(sprintf("%s%d: %s => %d\n",pool,conf,name,m))
+			if (m > maxnum) {
 				maxnum <- m
 			}		
 		}
 	}
-	return(m)	
+	return(maxnum)	
 }
