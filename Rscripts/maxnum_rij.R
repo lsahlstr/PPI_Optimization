@@ -23,7 +23,7 @@ maxnum_rij <- function(pool="n",pdb) {
 			name <- names[i]
 			tmp <- c(subset(R,pair==name)$rij)
 			m <- length(tmp)
-			cat(sprintf("%s%d: %s => %d\n",pool,conf,name,m))
+			cat(sprintf("%s %s%d: %s => %d\n",pdb,pool,conf,name,m))
 			if (m > maxnum) {
 				maxnum <- m
 			}		

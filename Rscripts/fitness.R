@@ -15,6 +15,8 @@ SLR <- function(tmp){
     return(-sum(log(ri/N))/SLRmax)
 }
 
+
+## Averaged over all systems; Z-score * -1 for maximizing in GA optimization
 # Z-score with 12-6 potential
 fitnessZ_lj <- function(pars){
 	tmp <- ener_lj(pars)
@@ -52,4 +54,45 @@ fitnessSLR_etsr <- function(pars){
 	tmp <- ener_etsr(pars)  	
 	tmp <- tmp[order(tmp$ener),]
   	weighted.mean(ddply(.data=tmp,.var=c("system"),.fun=SLR)$V1,weights)
+}
+
+
+## For each individual system; Z-score NOT * -1
+# Z-score with 12-6 potential
+fitnessZ_lj_indiv <- function(pars){
+	tmp <- ener_lj(pars)
+  	ddply(.data=tmp,.var=c("system"),.fun=Zscore)$V1
+}
+
+# SLR with 12-6 potential
+fitnessSLR_lj_indiv <- function(pars){
+	tmp <- ener_lj(pars)
+	tmp <- tmp[order(tmp$ener),]  	
+  	ddply(.data=tmp,.var=c("system"),.fun=SLR)$V1  	
+}
+
+# Z-score with 12-10-6 potential ("ETEN")
+fitnessZ_eten_indiv <- function(pars){	
+	tmp <- ener_eten(pars)
+  	ddply(.data=tmp,.var=c("system"),.fun=Zscore)$V1 	
+}
+
+# SLR with 12-10-6 potential ("ETEN")
+fitnessSLR_eten_indiv <- function(pars){	
+	tmp <- ener_eten(pars)
+	tmp <- tmp[order(tmp$ener),]  	
+  	ddply(.data=tmp,.var=c("system"),.fun=SLR)$V1 	  	
+}
+
+# Z-score with short-range 12-10-6 potential ("ETSR")
+fitnessZ_etsr_indiv <- function(pars){
+	tmp <- ener_etsr(pars)
+  	ddply(.data=tmp,.var=c("system"),.fun=Zscore)$V1  	
+}
+
+# SLR with short-range 12-10-6 potential ("ETSR")
+fitnessSLR_etsr_indiv <- function(pars){
+	tmp <- ener_etsr(pars)  	
+	tmp <- tmp[order(tmp$ener),]
+  	ddply(.data=tmp,.var=c("system"),.fun=SLR)$V1
 }

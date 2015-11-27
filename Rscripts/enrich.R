@@ -17,5 +17,7 @@ enrichment <- function(data,thresholds=seq(0.05,0.20,0.05)) {
 	enrich$pdb <- as.character(pdbs[unique(data$system)])
 	
 	write.table(enrich,file="enrich.dat",row.names=F,quote=F,col.names=F)
+	
+	return(enrich)
 
 }

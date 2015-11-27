@@ -76,10 +76,6 @@ source(paste(workdir,'big_pars.R',sep=""))
 source(paste(workdir,'ener_check.R',sep=""))
 # Fitness functions
 source(paste(workdir,'fitness.R',sep=""))
-# Evaluate fitness functions
-# source(paste(workdir,'fitness_eval.R',sep=""))
-# Evaluate fitness functions for each individual system
-source(paste(workdir,'fitness_eval_indiv.R',sep=""))
 # Genetic Algorithm optimization
 source(paste(workdir,'ga_opt.R',sep=""))
 # Mean Z-score and SLR at each cycle
@@ -186,16 +182,16 @@ bestPars <- as.vector(GAReal@bestSol[[iters]][1,])
 # Analysis
 #######################################################################
 # Mean Z-score and SLR at each cycle
-#fitness_cycle()
+fitness_cycle()
 
 # Z-score and SLR for each system before and after optimization
-#fitness_before_after()
+fitness_before_after()
 
 # Compute energies with initial and optimized parameters; combine with RMSD and system information
-#rmsd_ener <- rmsd_ener()
+rmsd_ener <- rmsd_ener()
 
 # Enrichment score
-#test <- ddply(.dat=rmsd_ener,.var=c("system"),.fun=enrichment)
+enrich <- ddply(.data=rmsd_ener,.var=c("system"),.fun=enrichment)
 
 # Save R environment variables and image
 save.image("opt.RData")
