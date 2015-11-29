@@ -52,8 +52,8 @@ ga_opt <- function() {
 
 	# Run GA
 	cat(sprintf("%s\n\n",date()))
-	#GAReal <- ga(type = "real-valued", fitness=ffunc, min=min, max=max, popSize=popSize, maxiter=iters, suggestions=jitter(initialSolution), keepBest=T, parallel=TRUE) 
-	GAReal <- ga(type = "real-valued", fitness=ffunc, min=min, max=max, popSize=popSize, maxiter=iters, suggestions=jitter(initialSolution), keepBest=T) 
+	GAReal <- ga(type = "real-valued", fitness=ffunc, min=min, max=max, popSize=popSize, maxiter=iters, suggestions=jitter(initialSolution), keepBest=T, parallel=TRUE) 
+	#GAReal <- ga(type = "real-valued", fitness=ffunc, min=min, max=max, popSize=popSize, maxiter=iters, suggestions=jitter(initialSolution), keepBest=T) 
 	cat(sprintf("%s\n\n",date()))
 
 	# Save data from all GA cycles to R data structure

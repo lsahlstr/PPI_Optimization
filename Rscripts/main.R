@@ -152,7 +152,7 @@ lsize <- opt$maxij
 # Energy test
 #check <- ener_check(0.1)
 
-#save.image("check2.RData")
+#save.image("check.RData")
 
 #cat("made it here\n")
 #cat(sprintf("%s\n\n",date()))
@@ -177,6 +177,9 @@ GAReal <- ga_opt()
 # Best solution from GA optimization
 bestPars <- as.vector(GAReal@bestSol[[iters]][1,])
 
+cat("made it here\n")
+cat(sprintf("%s\n\n",date()))
+stop()
 
 #######################################################################
 # Analysis
