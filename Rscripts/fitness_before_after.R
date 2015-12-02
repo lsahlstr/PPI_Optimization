@@ -15,8 +15,8 @@ fitness_before_after <- function() {
 		zscore_indiv_write <- data.frame(old=zscore_indiv_old,new=zscore_indiv_new)
 		zscore_indiv_write$pdb <- pdbs
 	
-		slr_indiv_old <- fitnessSLR_eten_indiv(ipars)
-		slr_indiv_new <- fitnessSLR_eten_indiv(bestPars)
+		slr_indiv_old <- fitnessSLR_lj_indiv(ipars)
+		slr_indiv_new <- fitnessSLR_lj_indiv(bestPars)
 		slr_indiv_write <- data.frame(old=slr_indiv_old,new=slr_indiv_new)
 		slr_indiv_write$pdb <- pdbs
 
@@ -39,8 +39,8 @@ fitness_before_after <- function() {
 		zscore_indiv_write <- data.frame(old=zscore_indiv_old,new=zscore_indiv_new)
 		zscore_indiv_write$pdb <- pdbs
 	
-		slr_indiv_old <- fitnessSLR_eten_indiv(ipars)
-		slr_indiv_new <- fitnessSLR_eten_indiv(bestPars)
+		slr_indiv_old <- fitnessSLR_etsr_indiv(ipars)
+		slr_indiv_new <- fitnessSLR_etsr_indiv(bestPars)
 		slr_indiv_write <- data.frame(old=slr_indiv_old,new=slr_indiv_new)
 		slr_indiv_write$pdb <- pdbs
 	

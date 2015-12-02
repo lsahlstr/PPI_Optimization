@@ -185,7 +185,7 @@ bestPars <- as.vector(GAReal@bestSol[[iters]][1,])
 # Analysis
 #######################################################################
 # Mean Z-score and SLR at each cycle
-#fitness_cycle()
+fitness_cycle()
 
 # Z-score and SLR for each system before and after optimization
 fitness_before_after()

@@ -77,9 +77,6 @@ ener_etsr <- function(pars) {
 	rmin_6 <- big_rmin(pars,6)
 	tmp3 <- rmin_6*rij_6
 	
-	# Energy per i,j interaction
-	tmp4 <- big_eps*(13*tmp1 - 18*tmp2 + 4*tmp3)
-	
 	# f(r)
 	tmp4 <- 1/(1 + (1/(rij_12*(129.7463*rmin_12))))
 

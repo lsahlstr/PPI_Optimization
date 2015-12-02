@@ -5,8 +5,8 @@ big_rmin <- function(pars,n=12){
 
 	list <- combinePARS(pars)
 	
-	#rmin <- unlist(mclapply((list$rmin**n),rep,lsize))
-	rmin <- unlist(mclapply((list$rmin**n),rep,lsize,mc.cores=16))
+	rmin <- unlist(lapply((list$rmin**n),rep,lsize))
+	#rmin <- unlist(mclapply((list$rmin**n),rep,lsize,mc.cores=16))
 	big_rmin_mat <- matrix(rmin,nrow=nrow(rij),ncol=ncol(rij),byrow=TRUE)
 	
     return(big_rmin_mat)
@@ -17,8 +17,8 @@ big_eps <- function(pars){
 
 	list <- combinePARS(pars)
 	
-	#eps <- unlist(mclapply((list$eps),rep,lsize))
-	eps <- unlist(mclapply((list$eps),rep,lsize,mc.cores=16))
+	eps <- unlist(mclapply((list$eps),rep,lsize))
+	#eps <- unlist(mclapply((list$eps),rep,lsize,mc.cores=16))
 	big_eps_mat <- matrix(eps,nrow=nrow(rij),ncol=ncol(rij),byrow=TRUE)
 	
     return(big_eps_mat)
