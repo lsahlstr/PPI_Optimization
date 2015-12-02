@@ -18,6 +18,7 @@ fitness_cycle <- function() {
 		}
 	} else if (potFlag == "etsr") {
 		for (i in 1:iters) {
+			cat(sprintf("%d\n",i))
 			zscore <- c(zscore,-1*fitnessZ_etsr(as.vector(GAReal@bestSol[[i]][1,])))
 			slr <- c(slr,fitnessSLR_etsr(as.vector(GAReal@bestSol[[i]][1,])))
 		}

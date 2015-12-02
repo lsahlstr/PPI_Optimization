@@ -152,11 +152,11 @@ lsize <- opt$maxij
 # Energy test
 #check <- ener_check(0.1)
 
-#save.image("check.RData")
+save.image("init.RData")
 
-#cat("made it here\n")
-#cat(sprintf("%s\n\n",date()))
-#stop()
+cat("made it here\n")
+cat(sprintf("%s\n\n",date()))
+stop()
 
 #######################################################################
 # Genetic Algorithm optimization
@@ -177,15 +177,15 @@ GAReal <- ga_opt()
 # Best solution from GA optimization
 bestPars <- as.vector(GAReal@bestSol[[iters]][1,])
 
-cat("made it here\n")
-cat(sprintf("%s\n\n",date()))
-stop()
+#cat("made it here\n")
+#cat(sprintf("%s\n\n",date()))
+#stop()
 
 #######################################################################
 # Analysis
 #######################################################################
 # Mean Z-score and SLR at each cycle
-fitness_cycle()
+#fitness_cycle()
 
 # Z-score and SLR for each system before and after optimization
 fitness_before_after()
