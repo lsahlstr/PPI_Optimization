@@ -2,7 +2,7 @@
 #######################################################################
 # R script for running a Genetic Algorithm-based optimization of a 
 # coarse-grained protein-protein interaction force field. 
-#		Logan S. Ahlstrom, Aaron T. Frank, and Blair Whittington, U. Michigan c. 2015
+#		Logan S. Ahlstrom, Blair Whittington, and Aaron T. Frank, and Blair Whittington, U. Michigan c. 2015
 #######################################################################
 
 
@@ -152,16 +152,7 @@ lsize <- opt$maxij
 # Energy test
 #check <- ener_check(0.1)
 
-save.image("init.RData")
-
-cat("made it here\n")
-cat(sprintf("%s\n\n",date()))
-stop()
-
-#######################################################################
-# Genetic Algorithm optimization
-#######################################################################
-# Setup parameters
+# GA parameters
 len <- length(ipars)
 popSize <- opt$popsize
 iters <- opt$ncycles
@@ -171,30 +162,33 @@ eps_max_val <- opt$maxval
 # Initial solution
 initialSolution <- matrix(ipars,ncol=length(ipars),nrow=popSize,byrow=T)
 
-# Run GA
-GAReal <- ga_opt()
-
-# Best solution from GA optimization
-bestPars <- as.vector(GAReal@bestSol[[iters]][1,])
-
+save.image("init.RData")
 #cat("made it here\n")
 #cat(sprintf("%s\n\n",date()))
 #stop()
 
 #######################################################################
+# Genetic Algorithm optimization
+#######################################################################
+GAReal <- ga_opt()
+
+# Best solution from GA optimization
+bestPars <- as.vector(GAReal@bestSol[[iters]][1,])
+
+#######################################################################
 # Analysis
 #######################################################################
 # Mean Z-score and SLR at each cycle
-fitness_cycle()
+#fitness_cycle()
 
 # Z-score and SLR for each system before and after optimization
-fitness_before_after()
+#fitness_before_after()
 
 # Compute energies with initial and optimized parameters; combine with RMSD and system information
-rmsd_ener <- rmsd_ener()
+#rmsd_ener <- rmsd_ener()
 
 # Enrichment score
-enrich <- ddply(.data=rmsd_ener,.var=c("system"),.fun=enrichment)
+#enrich <- ddply(.data=rmsd_ener,.var=c("system"),.fun=enrichment)
 
 # Save R environment variables and image
 save.image("opt.RData")
