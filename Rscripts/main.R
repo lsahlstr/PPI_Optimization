@@ -185,10 +185,10 @@ bestPars <- as.vector(GAReal@bestSol[[iters]][1,])
 #fitness_before_after()
 
 # Compute energies with initial and optimized parameters; combine with RMSD and system information
-#rmsd_ener <- rmsd_ener()
+#rmsd_ener_out <- rmsd_ener()
 
 # Enrichment score
-#enrich <- ddply(.data=rmsd_ener,.var=c("system"),.fun=enrichment)
+#enrich <- ddply(.data=rmsd_ener_out,.var=c("system"),.fun=enrichment)
 
 # Save R environment variables and image
 save.image("opt.RData")
